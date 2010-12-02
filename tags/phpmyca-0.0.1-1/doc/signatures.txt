@@ -1,0 +1,8 @@
+Get $decryptedSig by unencrypting the $encryptedSig with the public key.
+
+bin2hex($encryptedSig) gives you the signature displayed by cert utilities.
+
+md5 on the der cert gives you the certificate fingerprint.
+
+Run $decryptedSig through _parseAsn(), then bin2hex $ar[1][1][1] gives you
+a sha1 signature of what?  Possibly the original cert minus the signature.

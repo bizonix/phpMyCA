@@ -1,0 +1,48 @@
+<?
+/**
+ * phpmyca global configuration - locate outside of document root
+ * @package    phpmyca
+ * @author     Mike Green <mdgreen@gmail.com>
+ * @copyright  Copyright (c) 2010, Mike Green
+ * @license    http://opensource.org/licenses/gpl-2.0.php GPLv2
+ */
+(basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
+
+// Filesystem locations
+define('WEBAPP_DIR', '/usr/share/webapps/phpmyca');
+define('WEBAPP_API', WEBAPP_DIR . '/api');
+define('WEBAPP_TMP', WEBAPP_DIR . '/templates');
+
+// Database Settings
+define('WEBAPP_DB_HOST', 'localhost');
+define('WEBAPP_DB_NAME', 'phpMyCA');
+define('WEBAPP_DB_USER', 'dbusername');
+define('WEBAPP_DB_PASS', 'dbpassword');
+
+// session settings
+define('WEBAPP_NAME',     'phpMyCA');
+define('WEBAPP_SESS_KEY', 'phpmyca');
+
+// html settings
+define('WEBAPP_DOCTYPE',  '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">');
+define('WEBAPP_CHARSET',  'iso-8859-1');
+define('WEBAPP_META',     '<META HTTP-EQUIV="X-UA-Compatible" CONTENT="IE=Edge">');
+define('WEBAPP_CSS_URI',  'css/phpmyca.css');
+define('WEBAPP_JS_URI',   'js/phpmyca.js');
+
+// Location of openssl_conf, required by various openssl functions
+define('OPENSSL_CONF', WEBAPP_DIR . '/config/openssl.conf');
+
+// Debug view of certs?
+// define('DEBUG_VIEW_CERTS',true);
+
+// Set time zone
+date_default_timezone_set('America/Chicago');
+
+// Required includes
+require(WEBAPP_API . '/webapp.php');
+
+// instantiate webapp
+$_WA = new webapp();
+
+?>
