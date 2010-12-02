@@ -13,8 +13,8 @@
  */
 require(WEBAPP_API . '/strings.php');
 require(WEBAPP_API . '/db/phpmydb.class.php');
-require('/usr/share/php/phpdbo/phpdbo.class.php');
-require('/usr/share/php/phpdbo/phpdbo.form.class.php');
+require(WEBAPP_API . '/db/phpdbo.class.php');
+require(WEBAPP_API . '/db/phpdbo.form.class.php');
 require(WEBAPP_API . '/db/dbo.php');
 
 /**

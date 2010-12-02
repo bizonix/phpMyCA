@@ -7,10 +7,5 @@ Standards-Version: 3.6.2
 
 Package: phpmyca
 Architecture: all
-Depends: openssl, phpdbo-form-api
+Depends: openssl, php5-mysql, libapache2-mod-php5
 Description: PHP/MySQL based openssl Certificate Authority
-
-Package: phpmyca-sql-install
-Architecture: all
-Depends: mysql-server, db-install
-Description: Creates phpmyca database

@@ -2,7 +2,6 @@
 
 PKG    = phpmyca
 VDIR   = /usr/share/webapps/phpmyca
-INS    = phpmyca-sql-install
 
 build:
 	touch build-stamp
@@ -31,11 +30,6 @@ install-stamp:
 	mv js debian/$(PKG)/$(VDIR)
 	mv templates debian/$(PKG)/$(VDIR)
 	mv config/* debian/$(PKG)/etc/$(PKG)
-	#
-	# Create $(INS)
-	#
-	mkdir -p debian/$(INS)/var/cache/sql
-	mv sql/*.sql debian/$(INS)/var/cache/sql
 	touch install-stamp
 
 # Build architecture-independent files here.
@@ -46,8 +40,6 @@ binary-indep: install
 	for p in $(PKG); do \
 	find debian/$(PKG) -type d | xargs chmod 755; \
 	find debian/$(PKG) -type f | xargs chmod 644; \
-	find debian/$(INS) -type d | xargs chmod 700; \
-	find debian/$(INS) -type f | xargs chmod 600; \
 	done
 	dh_installdeb
 	dh_gencontrol
