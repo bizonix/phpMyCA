@@ -1,0 +1,4 @@
+#!/bin/sh -e
+echo
+echo "run: db-install to initialize the phpmyca database"
+echo
