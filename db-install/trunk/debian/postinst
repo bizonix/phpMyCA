@@ -1,0 +1,6 @@
+#!/bin/sh -e
+
+if [ ! -d /var/cache/sql ]; then
+	mkdir -p /var/cache/sql
+	chmod 700 /var/cache/sql
+fi
