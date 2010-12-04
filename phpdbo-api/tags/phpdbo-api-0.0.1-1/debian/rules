@@ -1,0 +1,59 @@
+#!/usr/bin/make -f
+
+SHARE = /usr/share/php/phpdbo
+DBO   = phpdbo-api
+FORM   = phpdbo-form-api
+MYDB   = phpmydb
+
+ALLDIRS = $(DBO) $(FORM) $(MYDB)
+
+build:
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	dh_clean
+
+install: install-stamp
+install-stamp:
+	dh_testdir
+	dh_testroot
+	dh_clean
+	dh_installdirs
+	#
+	# $(DBO)
+	#
+	mkdir -p debian/$(DBO)$(SHARE)
+	mv phpdbo.class.php debian/$(DBO)$(SHARE)
+	#
+	# $(FORM)
+	#
+	mkdir -p debian/$(FORM)$(SHARE)
+	mv phpdbo.form.class.php debian/$(FORM)$(SHARE)
+	mv phpdbo.view.class.php debian/$(FORM)$(SHARE)
+	#
+	# $(MYDB)
+	#
+	mkdir -p debian/$(MYDB)$(SHARE)
+	mv phpmydb.class.php debian/$(MYDB)$(SHARE)
+	touch install-stamp
+
+# Build architecture-independent files here.
+binary-indep: install
+	dh_testdir
+	dh_testroot
+	dh_fixperms
+	for dir in $(ALLDIRS); do \
+		find debian/$$dir -type d | xargs chmod 755; \
+		find debian/$$dir -type f | xargs chmod 644; \
+	done
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+
+binary: binary-indep
+.PHONY: clean binary-indep binary install
