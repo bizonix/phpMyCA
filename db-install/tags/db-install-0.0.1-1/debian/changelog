@@ -1,0 +1,6 @@
+db-install (0.0.1-1) stable; urgency=low
+
+  * Initial packaging release.
+
+ -- Mike Green <mdgreen@gmail.com>  Fri, 03 Dec 2010 10:18:02 -0500
+

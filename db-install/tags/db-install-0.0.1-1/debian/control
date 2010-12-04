@@ -1,0 +1,11 @@
+Source: db-install
+Section: admin
+Priority: optional
+Maintainer: Mike Green <mdgreen@gmail.com>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.2
+
+Package: db-install
+Architecture: all
+Description: Automate installation of databases
+ Copy any sql scripts to /var/cache/sql and this utility will run it once.

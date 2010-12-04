@@ -1,0 +1,40 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+PKG = db-install
+
+build:
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	dh_clean
+
+install: install-stamp
+install-stamp:
+	dh_testdir
+	dh_testroot
+	dh_clean
+	dh_installdirs
+	#
+	# $(PKG)
+	#
+	mkdir -p debian/$(PKG)/usr/local/bin
+	cp $(PKG).sh debian/$(PKG)/usr/local/bin/$(PKG)
+	touch install-stamp
+
+# Build architecture-independent files here.
+binary-indep: install
+	dh_testdir
+	dh_testroot
+	dh_fixperms
+	chmod 755 debian/$(PKG)/usr/local/bin/*
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep
+.PHONY: clean binary-indep binary install
