@@ -20,3 +20,8 @@ Architecture: all
 Depends: php5-mysql | php4-mysql
 Description: Generic PHP MySQL Class
  Generic PHP MySQL Class
+
+Package: phpdbo-log-api
+Architecture: all
+Depends: phpdbo-form-api
+Description: Generic logging class based on phpdboform object
