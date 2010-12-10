@@ -40,6 +40,9 @@ define('OPENSSL_CONF', WEBAPP_DIR . '/config/openssl.conf');
 date_default_timezone_set('America/Chicago');
 
 // Required includes
+require('/usr/share/php/phpdbo/phpmydb.class.php');
+require('/usr/share/php/phpdbo/phpdbo.class.php');
+require('/usr/share/php/phpdbo/phpdbo.form.class.php');
 require(WEBAPP_API . '/webapp.php');
 
 // instantiate webapp
