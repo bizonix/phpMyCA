@@ -67,3 +67,4 @@ basicConstraints        = critical,CA:FALSE
 subjectKeyIdentifier    = hash
 keyUsage                = critical,digitalSignature,keyEncipherment,dataEncipherment
 extendedKeyUsage        = clientAuth,codeSigning,emailProtection,msCodeInd,msCodeCom,msCTLSign
+subjectAltName          = email:copy
