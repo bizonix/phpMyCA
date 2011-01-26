@@ -48,6 +48,30 @@ $qs_bundle  = $this->getActionQs(WA_ACTION_BUNDLE);
 $qs_import_pem = $this->getActionQs(WA_ACTION_BROWSER_IMPORT);
 $isEncrypted   = (strpos($data->getProperty('PrivateKey'),'ENCRYPTED') === false) ? false : true;
 
+// expired or revoked?
+$expireDate = $data->getProperty('ValidTo');
+$revokeDate = $data->getProperty('RevokeDate');
+$expireTime = ($expireDate) ? strtotime($expireDate) : false;
+$revokeTime = ($revokeDate) ? strtotime($revokeDate) : false;
+$now        = time();
+$day        = 60 * 60 * 24;
+$now30      = $now + ($day * 30);
+$now60      = $now + ($day * 60);
+$now90      = $now + ($day * 90);
+$expired    = ($expireTime && ($now > $expireTime));
+$revoked    = ($revokeTime && ($now > $revokeTime));
+// set class for expired
+$expireClass = '';
+if (!$expired and !$revoked and $expireTime) {
+	if ($now30 > $expireTime) {
+		$expireClass = ' class="expire30"';
+		} elseif ($now60 > $expireTime) {
+		$expireClass = ' class="expire60"';
+		} elseif ($now90 > $expireTime) {
+		$expireClass = ' class="expire90"';
+		}
+	}
+
 // footer links
 if ($data->getProperty('PrivateKey')) {
 	if ($isEncrypted) {
@@ -82,12 +106,21 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 			<?= $data->getProperty('Description') . "\n"; ?>
 		</TD>
 	</TR>
+<? if ($revoked) { ?>
+	<TR>
+		<TH>Date Revoked</TH>
+		<TD>
+			<?= $data->getProperty('RevokeDate'); ?>
+		</TD>
+	</TR>
+<? } else { ?>
 	<TR>
 		<TH>Date Valid</TH>
-		<TD>
+		<TD<?= $expireClass; ?>>
 			<?= $data->getProperty('ValidFrom') . ' to ' . $data->getProperty('ValidTo') . "\n"; ?>
 		</TD>
 	</TR>
+<? } ?>
 <? if ($hasContact) { ?>
 	<TR>
 		<TH COLSPAN="2">Contact Information</TH>

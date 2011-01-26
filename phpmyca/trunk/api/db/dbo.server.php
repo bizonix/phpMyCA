@@ -33,6 +33,7 @@ function __construct() {
 	$this->propertyAdd('ParentId',         'ca_id');
 	$this->propertyAdd('PrivateKey',       'cert_private_key');
 	$this->propertyAdd('PublicKey',        'cert_public_key');
+	$this->propertyAdd('RevokeDate',       'revoke_date');
 	$this->propertyAdd('SerialNumber',     'cert_serial');
 	$this->propertyAdd('StateName',        'stateOrProvinceName');
 	$this->propertyAdd('ValidFrom',        'start_date');
@@ -41,6 +42,7 @@ function __construct() {
 	$this->setIdProperty('Id');
 	// set date properties
 	$this->setPropertyIsDate('CreateDate', true);
+	$this->setPropertyIsDate('RevokeDate', true);
 	$this->setPropertyIsDate('ValidFrom',  true);
 	$this->setPropertyIsDate('ValidTo',    true);
 	// set numeric properties
@@ -64,6 +66,7 @@ function __construct() {
 	$this->setPropertyMaxLength('ParentId',            10);
 	$this->setPropertyMaxLength('PrivateKey',       65535);
 	$this->setPropertyMaxLength('PublicKey',        65535);
+	$this->setPropertyMaxLength('RevokeDate',          19);
 	$this->setPropertyMaxLength('SerialNumber',        64);
 	$this->setPropertyMaxLength('StateName',           64);
 	$this->setPropertyMaxLength('ValidFrom',           19);

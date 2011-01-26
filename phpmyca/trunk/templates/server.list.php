@@ -26,6 +26,13 @@ $base_qs   = $this->getActionQs($list->actionQsView,0);
 $qs_export = $this->getActionQs(WA_ACTION_SERVER_EXPORT_ALL);
 $class     = '';
 
+// for comparing expiration/revocation dates
+$now   = time();
+$day   = 60 * 60 * 24;
+$now30 = $now + ($day * 30);
+$now60 = $now + ($day * 60);
+$now90 = $now + ($day * 90);
+
 // footer links
 $l = array();
 $this->addMenuLink($qs_sign,'Generate Cert From CSR','greenoutline');
@@ -44,8 +51,27 @@ $this->addMenuLink('./','Main Menu','greenoutline');
 <?
 if (is_array($list->searchResults)) {
 foreach($list->searchResults as $row) {
-	$class = ($class == 'on') ? 'off' : 'on';
+	$class = (substr($class,0,2) == 'on') ? 'off' : 'on';
 	$id = (isset($row[$idProp])) ? $row[$idProp] : false;
+	// expired or revoked?
+	$t          = (isset($row['ValidTo']));
+	$expireDate = ($t) ? strtotime($row['ValidTo']) : false;
+	$expired    = ($t && ($now > $expireDate));
+	$t          = (isset($row['RevokeDate']));
+	$revokeDate = ($t) ? strtotime('RevokeDate') : false;
+	$revoked = ($t && ($now > $revokeDate));
+	if ($expired) { $class .= ' expired'; }
+	if ($revoked) { $class .= ' revoked'; }
+	// expiring soon?
+	if (!$expired and !$revoked and $expireDate) {
+		if ($now30 > $expireDate) {
+			$class .= ' expire30';
+			} elseif ($now60 > $expireDate) {
+			$class .= ' expire60';
+			} elseif ($now90 > $expireDate) {
+			$class .= ' expire90';
+			}
+		}
 ?>
 	<TR>
 <? foreach($row as $prop => $val) {

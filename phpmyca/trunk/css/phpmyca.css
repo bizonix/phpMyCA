@@ -72,10 +72,19 @@ td {
 	vertical-align: top;
 	}
 td.off {
-	border: 1px solid #a0a0a0;
 	background-color: #CEE3EC;
-	padding: 3px;
-	vertical-align: top;
+	}
+td.expired, td.revoked {
+	text-decoration: line-through;
+	}
+td.expire30 {
+	background-color: #ff0000;
+	}
+td.expire60 {
+	background-color: #ffb68b;
+	}
+td.expire90 {
+	background-color: #feffd6;
 	}
 #contentContainer {
 	border: 2px solid black;

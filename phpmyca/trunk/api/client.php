@@ -24,7 +24,7 @@ public function __construct() {
 	// Set searchable properties
 	$p = array('CommonName','CreateDate','Description',
 	'FingerprintMD5','FingerprintSHA1','Id','OrgName',
-	'OrgUnitName','ParentId','SerialNumber','ValidFrom',
+	'OrgUnitName','ParentId','RevokeDate','SerialNumber','ValidFrom',
 	'ValidTo');
 	foreach($p as $prop) { $this->addSearchProperty($prop); }
 	// default search property

@@ -24,8 +24,8 @@ public function __construct() {
 	// Set searchable properties
 	$p = array('CommonName','CountryName','CreateDate','Description',
 	'EmailAddress','FingerprintMD5','FingerprintSHA1','Id','LocalityName',
-	'OrgName','OrgUnitName','ParentId','SerialNumber','StateName','ValidFrom',
-	'ValidTo');
+	'OrgName','OrgUnitName','ParentId','RevokeDate','SerialNumber','StateName',
+	'ValidFrom','ValidTo');
 	foreach($p as $prop) { $this->addSearchProperty($prop); }
 	// default search property
 	$this->setSearchPropertyDefault('CommonName');
