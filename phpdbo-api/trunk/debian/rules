@@ -4,9 +4,8 @@ SHARE  = /usr/share/php/phpdbo
 DBO    = phpdbo-api
 FORM   = phpdbo-form-api
 LOG    = phpdbo-log-api
-MYDB   = phpmydb
 
-ALLDIRS = $(DBO) $(FORM) $(MYDB) $(LOG)
+ALLDIRS = $(DBO) $(FORM) $(LOG)
 
 build:
 	touch build-stamp
@@ -28,17 +27,13 @@ install-stamp:
 	#
 	mkdir -p debian/$(DBO)$(SHARE)
 	mv phpdbo.class.php debian/$(DBO)$(SHARE)
+	mv phpmydb.class.php debian/$(DBO)$(SHARE)
 	#
 	# $(FORM)
 	#
 	mkdir -p debian/$(FORM)$(SHARE)
 	mv phpdbo.form.class.php debian/$(FORM)$(SHARE)
 	mv phpdbo.view.class.php debian/$(FORM)$(SHARE)
-	#
-	# $(MYDB)
-	#
-	mkdir -p debian/$(MYDB)$(SHARE)
-	mv phpmydb.class.php debian/$(MYDB)$(SHARE)
 	#
 	# $(LOG)
 	#

@@ -7,19 +7,13 @@ Standards-Version: 3.6.2
 
 Package: phpdbo-api
 Architecture: all
-Depends: php5, phpmydb
+Depends: php5
 Description: Base class for php db object framework class
 
 Package: phpdbo-form-api
 Architecture: all
 Depends: phpdbo-api
 Description: Form generation class based on phpdbo
-
-Package: phpmydb
-Architecture: all
-Depends: php5-mysql | php4-mysql
-Description: Generic PHP MySQL Class
- Generic PHP MySQL Class
 
 Package: phpdbo-log-api
 Architecture: all
