@@ -1,0 +1,5 @@
+Impose some controls on revocation - require password if private key is
+encrypted.
+
+Recursively look up certificates that have been signed by CA certificates being
+revoked.
