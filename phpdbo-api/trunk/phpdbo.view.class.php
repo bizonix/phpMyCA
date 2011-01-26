@@ -309,7 +309,7 @@ function doQueryList() {
 	if (!is_numeric($this->pageCurrent) or $this->pageCurrent < 1) {
 		return 'must set pageCurrent before doQueryList()';
 		}
-	if (!is_numeric($this->hitsMax) or $this->hitsMax < 1) {
+	if (!is_numeric($this->hitsMax) or $this->hitsMax < 0) {
 		return 'must set hitsMax before doQueryList()';
 		}
 	// add list properties
@@ -344,29 +344,38 @@ function doQueryList() {
 		return true;
 		}
 	//
-	// Apply paging and limits
+	// Apply paging and limits, unless hitsMax is 0
 	//
-	$pagesMax     = ceil($this->hitsTotal / $this->hitsMax);
-	if ($this->pageCurrent > $pagesMax) {
-		$this->pageCurrent = $pagesMax - 1;
-		}
-	$pageCurrent    = $this->pageCurrent;
-	$this->pageNext = $this->pageCurrent + 1;
-	$this->pagePrevious = $this->pageCurrent - 1;
-	if ($this->pageNext > $pagesMax) {
-		$this->pageNext = $pagesMax;
-		}
-	if ($this->pagePrevious < 1) {
-		$this->pagePrevious = 0;
-		}
-	$this->pageLast = $pagesMax;
-	if ($this->pageCurrent > 1) {
-		$limit = ($this->hitsMax * ($this->pageCurrent - 1)) . ','
-		. $this->hitsMax;
+	if ($this->hitsMax == 0) {
+		$this->pageCurrent = 1;
+		$this->pageNext = 1;
+		$this->pagePrevious = 1;
+		$this->pageLast = 1;
+		$limit = $this->hitsTotal;
+		$this->setSearchLimit($limit);
 		} else {
-		$limit = $this->hitsMax;
+		$pagesMax     = ceil($this->hitsTotal / $this->hitsMax);
+		if ($this->pageCurrent > $pagesMax) {
+			$this->pageCurrent = $pagesMax - 1;
+			}
+		$pageCurrent    = $this->pageCurrent;
+		$this->pageNext = $this->pageCurrent + 1;
+		$this->pagePrevious = $this->pageCurrent - 1;
+		if ($this->pageNext > $pagesMax) {
+			$this->pageNext = $pagesMax;
+			}
+		if ($this->pagePrevious < 1) {
+			$this->pagePrevious = 0;
+			}
+		$this->pageLast = $pagesMax;
+		if ($this->pageCurrent > 1) {
+			$limit = ($this->hitsMax * ($this->pageCurrent - 1)) . ','
+			. $this->hitsMax;
+			} else {
+			$limit = $this->hitsMax;
+			}
+		$this->setSearchLimit($limit);
 		}
-	$this->setSearchLimit($limit);
 	// Do the query
 	$rows = $this->query();
 	if (!is_array($rows)) {
