@@ -38,6 +38,9 @@ switch($_WA->html->getActionRequest()) {
 	case WA_ACTION_CA_PKCS12:
 		die($_WA->getPageCaPkcs12());
 	break;
+	case WA_ACTION_CA_REVOKE:
+		die($_WA->getPageCaRevoke());
+	break;
 	case WA_ACTION_CA_VIEW:
 		die($_WA->getPageCaView());
 	break;

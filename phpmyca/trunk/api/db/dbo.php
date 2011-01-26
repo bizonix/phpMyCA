@@ -79,6 +79,24 @@ public function add($validate=true) {
 	}
 
 /**
+ * Obtain array of certificates that have been issued by specified signer id
+ * @param int $id
+ * @return mixed
+ *   bool false on errors, array on success
+ */
+public function getIssuerSubjects($id = null) {
+	if (!is_numeric($id) or $id < 1) { return false; }
+	$this->searchReset();
+	foreach($this->getPropertyList() as $prop) {
+		$this->setSearchSelect($prop);
+		}
+	$this->setSearchFilter('ParentId',$id);
+	$this->setSearchOrder('Id');
+	$rows = $this->query();
+	return (is_array($rows)) ? $rows : false;
+	}
+
+/**
  * Obtain PEM encoded certificate of specified certificate id
  * @param int $certId
  * @return mixed
@@ -92,6 +110,51 @@ public function getPemCertById($certId=null) {
 	$rows = $this->query();
 	if (!is_array($rows) or count($rows) < 1) { return false; }
 	return $rows[0]['Certificate'];
+	}
+
+/**
+ * Is populated cert expired?
+ * @param $days
+ *   Optionally specify number of days in the future to check
+ * @return boolean
+ */
+public function isExpired($days = null) {
+	if (!$this->populated) { return false; }
+	$now = time();
+	if (is_numeric($days) and $days > 0) {
+		$now += (60 * 60 * 24) * $days;
+		}
+	$expireDate = $this->getProperty('ValidTo');
+	$expireTime = ($expireDate) ? strtotime($expireDate) : false;
+	return ($expireTime && ($now >= $expireTime));
+	}
+
+/**
+ * Is populated cert revoked?
+ * @return boolean
+ */
+public function isRevoked() {
+	if (!$this->populated) { return false; }
+	$revokeDate = $this->getProperty('RevokeDate');
+	$revokeTime = ($revokeDate) ? strtotime($revokeDate) : false;
+	return ($revokeTime && (time() >= $revokeTime));
+	}
+
+/**
+ * Populate new object from specified array (instead of db)
+ * @param $props
+ *   Array with keys (property names) and values (property values)
+ * @return bool
+ */
+public function populateFromArray(&$ar=null) {
+	if ($this->populated) { return false; }
+	if (!is_array($ar) or !count($ar)) { return false; }
+	$this->resetProperties();
+	foreach($ar as $prop => $val) {
+		$this->setProperty($prop,$val);
+		}
+	$this->populated = true;
+	return true;
 	}
 
 /**

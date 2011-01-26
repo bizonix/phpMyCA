@@ -1901,6 +1901,74 @@ function getPageCaPkcs12() {
 	}
 
 /**
+ * Revoke a CA certificate.
+ * @return void
+ */
+public function getPageCaRevoke() {
+	$this->html->setPageTitle('Revoke CA Certificate');
+	$id = $this->html->crumbGet(WA_QS_ID);
+	if (!is_numeric($id) or $id < 1) {
+		$this->html->errorMsgSet('Must specify valid certificate id.');
+		die($this->getPageCaView());
+		}
+	$this->moduleRequired('ca,client,server');
+	$this->ca->resetProperties();
+	if ($this->ca->populateFromDb($id) === false) {
+		$this->html->errorMsgSet('Failed to locate the specified certificate.');
+		die($this->getPageCaView());
+		}
+	// Is it already revoked?
+	if ($this->ca->isRevoked()) {
+		$this->html->errorMsgSet('The certificate is already revoked.');
+		die($this->getPageCaView());
+		}
+	// Is it already expired?
+	if ($this->ca->isExpired()) {
+		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
+		die($this->getPageCaView());
+		}
+	// Get list of other ca certs this ca has signed.
+	$caCerts = $this->ca->getIssuerSubjects($id);
+	if (!is_array($caCerts)) {
+		$msg = 'Failed to query CA certs signed by this CA, will not '
+		     . 'continue.';
+		$this->html->errorMsgSet($msg);
+		die($this->getPageCaView());
+		}
+	$this->html->setVar('caCerts',&$caCerts);
+	// Get list of client certs this ca has signed
+	$clientCerts = $this->client->getIssuerSubjects($id);
+	if (!is_array($clientCerts)) {
+		$msg = 'Failed to query client certs signed by this CA, will not '
+		     . 'continue.';
+		$this->html->errorMsgSet($msg);
+		die($this->getPageCaView());
+		}
+	$this->html->setVar('clientCerts',&$clientCerts);
+	// Get list of server certs this ca has signed
+	$serverCerts = $this->server->getIssuerSubjects($id);
+	if (!is_array($serverCerts)) {
+		$msg = 'Failed to query server certs signed by this CA, will not '
+		     . 'continue.';
+		$this->html->errorMsgSet($msg);
+		die($this->getPageCaView());
+		}
+	$this->html->setVar('serverCerts',&$serverCerts);
+	// Have they confirmed?
+	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
+		$this->html->setVar('data',&$this->ca);
+		die($this->html->loadTemplate('ca.revoke.confirm.php'));
+		}
+	// Get on wit it
+	$this->ca->setProperty('RevokeDate','now()');
+	$rc = $this->ca->update();
+	if (!($rc === true)) {
+		$this->html->errorMsgSet($rc);
+		}
+	die($this->getPageCaView());
+	}
+
+/**
  * View a CA certificate.
  * @return void
  */
@@ -2048,6 +2116,47 @@ function getPageClientPkcs12() {
 	header('Content-Transfer-Encoding: binary');
 	header('Content-Length: ' . strlen($pkcs12));
 	die($pkcs12);
+	}
+
+/**
+ * Revoke a client certificate.
+ * @return void
+ */
+public function getPageClientRevoke() {
+	$this->html->setPageTitle('Revoke Client Certificate');
+	$id = $this->html->crumbGet(WA_QS_ID);
+	if (!is_numeric($id) or $id < 1) {
+		$this->html->errorMsgSet('Must specify valid certificate id.');
+		die($this->getPageClientView());
+		}
+	$this->moduleRequired('client');
+	$this->client->resetProperties();
+	if ($this->client->populateFromDb($id) === false) {
+		$this->html->errorMsgSet('Failed to locate the specified certificate.');
+		die($this->getPageClientView());
+		}
+	// Is it already revoked?
+	if ($this->client->isRevoked()) {
+		$this->html->errorMsgSet('The certificate is already revoked.');
+		die($this->getPageClientView());
+		}
+	// Is it already expired?
+	if ($this->client->isExpired()) {
+		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
+		die($this->getPageClientView());
+		}
+	// Have they confirmed?
+	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
+		$this->html->setVar('data',&$this->client);
+		die($this->html->loadTemplate('client.revoke.confirm.php'));
+		}
+	// Get on wit it
+	$this->client->setProperty('RevokeDate','now()');
+	$rc = $this->client->update();
+	if (!($rc === true)) {
+		$this->html->errorMsgSet($rc);
+		}
+	die($this->getPageClientView());
 	}
 
 /**
@@ -2227,6 +2336,47 @@ function getPageServerPkcs12() {
 	header('Content-Transfer-Encoding: binary');
 	header('Content-Length: ' . strlen($pkcs12));
 	die($pkcs12);
+	}
+
+/**
+ * Revoke a server certificate.
+ * @return void
+ */
+public function getPageServerRevoke() {
+	$this->html->setPageTitle('Revoke Server Certificate');
+	$id = $this->html->crumbGet(WA_QS_ID);
+	if (!is_numeric($id) or $id < 1) {
+		$this->html->errorMsgSet('Must specify valid certificate id.');
+		die($this->getPageServerView());
+		}
+	$this->moduleRequired('server');
+	$this->server->resetProperties();
+	if ($this->server->populateFromDb($id) === false) {
+		$this->html->errorMsgSet('Failed to locate the specified certificate.');
+		die($this->getPageServerView());
+		}
+	// Is it already revoked?
+	if ($this->server->isRevoked()) {
+		$this->html->errorMsgSet('The certificate is already revoked.');
+		die($this->getPageServerView());
+		}
+	// Is it already expired?
+	if ($this->server->isExpired()) {
+		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
+		die($this->getPageServerView());
+		}
+	// Have they confirmed?
+	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
+		$this->html->setVar('data',&$this->server);
+		die($this->html->loadTemplate('server.revoke.confirm.php'));
+		}
+	// Get on wit it
+	$this->server->setProperty('RevokeDate','now()');
+	$rc = $this->server->update();
+	if (!($rc === true)) {
+		$this->html->errorMsgSet($rc);
+		}
+	die($this->getPageServerView());
 	}
 
 /**

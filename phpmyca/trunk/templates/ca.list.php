@@ -25,13 +25,6 @@ $base_qs   = $this->getActionQs($list->actionQsView,0);
 $qs_export = $this->getActionQs(WA_ACTION_CA_EXPORT_ALL);
 $class     = '';
 
-// for comparing expiration/revocation dates
-$now   = time();
-$day   = 60 * 60 * 24;
-$now30 = $now + ($day * 30);
-$now60 = $now + ($day * 60);
-$now90 = $now + ($day * 90);
-
 // footer links
 $l  = array();
 $this->addMenuLink($qs_imp,'Import CA Certificate','greenoutline');
@@ -50,23 +43,21 @@ $this->addMenuLink('./','Main Menu','greenoutline');
 if (is_array($list->searchResults)) {
 foreach($list->searchResults as $row) {
 	$class = ($class == 'on') ? 'off' : 'on';
-	$id = (isset($row[$idProp])) ? $row[$idProp] : false;
+	$list->resetProperties();
+	$list->populateFromArray($row);
+	$id = ($list->getProperty('Id')) ? $list->getProperty('Id') : false;
 	// expired or revoked?
-	$t          = (isset($row['ValidTo']));
-	$expireDate = ($t) ? strtotime($row['ValidTo']) : false;
-	$expired    = ($t && ($now > $expireDate));
-	$t          = (isset($row['RevokeDate']));
-	$revokeDate = ($t) ? strtotime('RevokeDate') : false;
-	$revoked = ($t && ($now > $revokeDate));
+	$expired = $list->isExpired();
+	$revoked = $list->isRevoked();
 	if ($expired) { $class .= ' expired'; }
 	if ($revoked) { $class .= ' revoked'; }
 	// expiring soon?
-	if (!$expired and !$revoked and $expireDate) {
-		if ($now30 > $expireDate) {
+	if (!$expired and !$revoked) {
+		if ($list->isExpired(30)) {
 			$class .= ' expire30';
-			} elseif ($now60 > $expireDate) {
+			} elseif ($list->isExpired(60)) {
 			$class .= ' expire60';
-			} elseif ($now90 > $expireDate) {
+			} elseif ($list->isExpired(90)) {
 			$class .= ' expire90';
 			}
 		}

@@ -35,6 +35,7 @@ define('WA_ACTION_CA_EXPORT_ALL',     'caexa');
 define('WA_ACTION_CA_IMPORT',         'caimp');
 define('WA_ACTION_CA_LIST',           'cal');
 define('WA_ACTION_CA_PKCS12',         'pkcs12');
+define('WA_ACTION_CA_REVOKE',         'carev');
 define('WA_ACTION_CA_VIEW',           'cav');
 // Client cert action strings
 define('WA_ACTION_CLIENT_ADD',        'ca');
@@ -44,6 +45,7 @@ define('WA_ACTION_CLIENT_EXPORT_ALL', 'cexa');
 define('WA_ACTION_CLIENT_IMPORT',     'cimp');
 define('WA_ACTION_CLIENT_LIST',       'cl');
 define('WA_ACTION_CLIENT_PKCS12',     'pkcs12');
+define('WA_ACTION_CLIENT_REVOKE',     'clrev');
 define('WA_ACTION_CLIENT_SIGN',       'ccsr');
 define('WA_ACTION_CLIENT_VIEW',       'cv');
 // Server Cert Action Strings
@@ -54,6 +56,7 @@ define('WA_ACTION_SERVER_EXPORT_ALL', 'sexa');
 define('WA_ACTION_SERVER_IMPORT',     'simp');
 define('WA_ACTION_SERVER_LIST',       'sl');
 define('WA_ACTION_SERVER_PKCS12',     'pkcs12');
+define('WA_ACTION_SERVER_REVOKE',     'srev');
 define('WA_ACTION_SERVER_SIGN',       'scsr');
 define('WA_ACTION_SERVER_VIEW',       'sv');
 // Server CSR Action strings

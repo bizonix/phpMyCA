@@ -60,7 +60,7 @@ public function __construct() {
 	// set properties when editing ca certs
 	$this->setPropertiesEdit(array('Description'));
 	// set properties when listing ca certs
-	$p = array('OrgName','CommonName','ValidTo');
+	$p = array('OrgName','CommonName','RevokeDate','ValidTo');
 	$this->setPropertiesList($p);
 	// set properties when viewing ca certs (all of them)
 	$this->setPropertiesView($this->getPropertyList());

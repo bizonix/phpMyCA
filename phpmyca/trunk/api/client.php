@@ -61,7 +61,7 @@ public function __construct() {
 	// set properties when editing client certs
 	$this->setPropertiesEdit(array('Description'));
 	// set properties when listing client certs
-	$p = array('CommonName','ValidTo');
+	$p = array('CommonName','RevokeDate','ValidTo');
 	$this->setPropertiesList($p);
 	// set properties when viewing ca certs (all of them)
 	$this->setPropertiesView($this->getPropertyList());

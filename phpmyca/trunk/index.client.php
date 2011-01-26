@@ -37,6 +37,9 @@ switch($_WA->html->getActionRequest()) {
 	case WA_ACTION_CLIENT_PKCS12:
 		die($_WA->getPageClientPkcs12());
 	break;
+	case WA_ACTION_CLIENT_REVOKE:
+		die($_WA->getPageClientRevoke());
+	break;
 	case WA_ACTION_CLIENT_SIGN:
 		die('not implemented yet');
 		die(getPageCsrSign());

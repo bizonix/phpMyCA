@@ -24,58 +24,50 @@ $hasContact = ($data->getProperty('CountryName') or
                $data->getProperty('OrgName') or
                $data->getProperty('OrgUnitName') or
                $data->getProperty('StateName'));
-$qs_back    = $this->getActionQs($data->actionQsList);
-$qs_edit    = $this->getActionQs($data->actionQsEdit);
-$qs_issuer  = $this->getMenuQs(MENU_CERTS_CA)
-            . '&' . WA_QS_ACTION . '=' . WA_ACTION_CA_VIEW
-            . '&' . WA_QS_ID . '=' . $data->getProperty('ParentId');
-$qs_bundle  = $this->getActionQs(WA_ACTION_BUNDLE);
-$qs_pkcs12  = $this->getActionQs(WA_ACTION_SERVER_PKCS12);
-
+$qs_back     = $this->getActionQs($data->actionQsList);
+$qs_edit     = $this->getActionQs($data->actionQsEdit);
+$qs_issuer   = $this->getMenuQs(MENU_CERTS_CA)
+             . '&' . WA_QS_ACTION . '=' . WA_ACTION_CA_VIEW
+             . '&' . WA_QS_ID . '=' . $data->getProperty('ParentId');
+$qs_bundle   = $this->getActionQs(WA_ACTION_BUNDLE);
+$qs_pkcs12   = $this->getActionQs(WA_ACTION_SERVER_PKCS12);
+$qs_download = $this->getActionQs(WA_ACTION_BROWSER_IMPORT);
+$qs_revoke   = $this->getActionQs(WA_ACTION_SERVER_REVOKE);
 $isEncrypted = (strpos($data->getProperty('PrivateKey'),'ENCRYPTED') === false) ? false : true;
 
 // expired or revoked?
-$expireDate = $data->getProperty('ValidTo');
-$revokeDate = $data->getProperty('RevokeDate');
-$expireTime = ($expireDate) ? strtotime($expireDate) : false;
-$revokeTime = ($revokeDate) ? strtotime($revokeDate) : false;
-$now        = time();
-$day        = 60 * 60 * 24;
-$now30      = $now + ($day * 30);
-$now60      = $now + ($day * 60);
-$now90      = $now + ($day * 90);
-$expired    = ($expireTime && ($now > $expireTime));
-$revoked    = ($revokeTime && ($now > $revokeTime));
+$expired = ($data->isExpired());
+$revoked = ($data->isRevoked());
 // set class for expired
 $expireClass = '';
-if (!$expired and !$revoked and $expireTime) {
-	if ($now30 > $expireTime) {
+if (!$expired and !$revoked) {
+	if ($data->isExpired(30)) {
 		$expireClass = ' class="expire30"';
-		} elseif ($now60 > $expireTime) {
+		} elseif ($data->isExpired(60)) {
 		$expireClass = ' class="expire60"';
-		} elseif ($now90 > $expireTime) {
+		} elseif ($data->isExpired(90)) {
 		$expireClass = ' class="expire90"';
 		}
 	}
 
-$qs_download = $this->getActionQs(WA_ACTION_BROWSER_IMPORT);
-
 // footer links
-$this->addMenuLink($qs_download,'Download Cert','greenoutline');
-if ($data->getProperty('PrivateKey')) {
-	if ($isEncrypted) {
-		$qs = $this->getActionQs(WA_ACTION_CHANGE_PASS);
-		$this->addMenuLink($qs,'Change Private Key Password','greenoutline');
-		$qs = $this->getActionQs(WA_ACTION_DECRYPT);
-		$this->addMenuLink($qs,'Decrypt Private Key','greenoutline');
-		} else {
-		$qs = $this->getActionQs(WA_ACTION_ENCRYPT);
-		$this->addMenuLink($qs,'Encrypt Private Key','greenoutline');
+if (!$expired and !$revoked) {
+	$this->addMenuLink($qs_revoke,'Revoke','redoutline');
+	$this->addMenuLink($qs_download,'Download Cert','greenoutline');
+	if ($data->getProperty('PrivateKey')) {
+		if ($isEncrypted) {
+			$qs = $this->getActionQs(WA_ACTION_CHANGE_PASS);
+			$this->addMenuLink($qs,'Change Private Key Password','greenoutline');
+			$qs = $this->getActionQs(WA_ACTION_DECRYPT);
+			$this->addMenuLink($qs,'Decrypt Private Key','greenoutline');
+			} else {
+			$qs = $this->getActionQs(WA_ACTION_ENCRYPT);
+			$this->addMenuLink($qs,'Encrypt Private Key','greenoutline');
+			}
 		}
+	$this->addMenuLink($qs_bundle,'Get CA Chain','greenoutline');
+	$this->addMenuLink($qs_pkcs12,'Get PKCS12','greenoutline');
 	}
-$this->addMenuLink($qs_bundle,'Get CA Chain','greenoutline');
-$this->addMenuLink($qs_pkcs12,'Get PKCS12','greenoutline');
-$this->addMenuLink($qs_edit,'Edit','greenoutline');
 $this->addMenuLink($qs_back,'Back','greenoutline');
 ?>
 <?= $this->getPageHeader(); ?>

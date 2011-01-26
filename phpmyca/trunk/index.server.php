@@ -48,6 +48,9 @@ switch($_WA->html->getActionRequest()) {
 	case WA_ACTION_SERVER_PKCS12:
 		die($_WA->getPageServerPkcs12());
 	break;
+	case WA_ACTION_SERVER_REVOKE:
+		die($_WA->getPageServerRevoke());
+	break;
 	case WA_ACTION_SERVER_SIGN:
 		die(getPageCsrSign());
 	break;

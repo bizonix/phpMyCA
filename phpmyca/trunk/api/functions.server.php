@@ -116,5 +116,4 @@ function getPageImport() {
 	$h[]  = $_WA->html->getPageFooter();
 	die(implode("\n",$h) . "\n");
 	}
-
 ?>
