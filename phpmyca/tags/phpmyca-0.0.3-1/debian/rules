@@ -1,0 +1,58 @@
+#!/usr/bin/make -f
+
+PKG    = phpmyca
+VDIR   = /usr/share/webapps/phpmyca
+INS    = phpmyca-sql-install
+
+build:
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	dh_clean
+
+install: install-stamp
+install-stamp:
+	dh_testdir
+	dh_testroot
+	dh_clean
+	dh_installdirs
+	#
+	# Create $(PKG)
+	#
+	mkdir -p debian/$(PKG)/$(VDIR)
+	mkdir -p debian/$(PKG)/etc/$(PKG)
+	mv *.php debian/$(PKG)/$(VDIR)
+	mv api debian/$(PKG)/$(VDIR)
+	mv css debian/$(PKG)/$(VDIR)
+	mv images debian/$(PKG)/$(VDIR)
+	mv js debian/$(PKG)/$(VDIR)
+	mv templates debian/$(PKG)/$(VDIR)
+	mv config/* debian/$(PKG)/etc/$(PKG)
+	#
+	# Create $(INS)
+	#
+	mkdir -p debian/$(INS)/var/cache/sql
+	mv sql/*.sql debian/$(INS)/var/cache/sql
+	touch install-stamp
+
+# Build architecture-independent files here.
+binary-indep: install
+	dh_testdir
+	dh_testroot
+	dh_fixperms
+	for p in $(PKG); do \
+	find debian/$(PKG) -type d | xargs chmod 755; \
+	find debian/$(PKG) -type f | xargs chmod 644; \
+	find debian/$(INS) -type d | xargs chmod 700; \
+	find debian/$(INS) -type f | xargs chmod 600; \
+	done
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep
+.PHONY: clean binary-indep binary install

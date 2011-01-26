@@ -1,0 +1,18 @@
+phpmyca (0.0.3-1) stable; urgency=low
+
+  * phpmyca: partially implemented certification revocation
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.2-1) stable; urgency=low
+
+  * phpmyca: highlight looming expirations, add revoke date.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.1-2) stable; urgency=low
+
+  * phpmyca: Import into google code project repo
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
