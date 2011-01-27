@@ -1,0 +1,16 @@
+Source: phpmyca
+Section: web
+Priority: optional
+Maintainer: Mike Green <mdgreen@gmail.com>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.2
+
+Package: phpmyca
+Architecture: all
+Depends: openssl, php5-mysql, libapache2-mod-php5, phpdbo-form-api
+Description: PHP/MySQL based openssl Certificate Authority
+
+Package: phpmyca-sql-install
+Architecture: all
+Depends: db-install
+Description: Initializes phpmyca database
