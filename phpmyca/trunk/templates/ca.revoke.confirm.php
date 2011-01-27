@@ -63,7 +63,7 @@ been revoked.
 			<?= $cert['OrgName']; ?>
 		</TD>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['OrgUnitName']; ?>
+			<?= substr($cert['OrgUnitName'],0,50); ?>...
 		</TD>
 	</TR>
 <? } ?>

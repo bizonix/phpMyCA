@@ -264,8 +264,9 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 <? foreach($signedCaCerts as $cert) {
 	$qs   = $qs_ca_cert . $cert['Id'];
 	$targ = '_viewCert' . $cert['Id'];
+	$txt  = (strlen($cert['CommonName']) > 0) ? $cert['CommonName'] : 'not set';
 	$hr   = '<A TARGET="' . $targ . '" HREF="' . $qs . '">'
-	      . $cert['CommonName'] . '</A>';
+	      . $txt . '</A>';
 	?>
 	<TR>
 		<TD><?= $hr; ?></TD>

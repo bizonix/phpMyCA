@@ -1935,6 +1935,7 @@ public function getPageCaRevoke() {
 		$this->html->errorMsgSet($msg);
 		die($this->getPageCaView());
 		}
+
 	$this->html->setVar('caCerts',&$caCerts);
 	// Get list of client certs this ca has signed
 	$clientCerts = $this->client->getIssuerSubjects($id);
