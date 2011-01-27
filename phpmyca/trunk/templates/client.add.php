@@ -101,4 +101,13 @@ changes cannot be made later without having to generate a new certificate.
 </TABLE>
 <?= $this->getFormFooter(); ?>
 <?= $this->getMessageFrame(); ?>
+<script type="text/javascript">
+// auto-populate on page load
+var el = document.getElementsByName('caId')[0];
+if (el) {
+	var curVal = el.value;
+	<?= 'var url = "' . $popUrl; ?>";
+	caSelected(el,url);
+	}
+</script>
 <?= $this->getPageFooter(); ?>

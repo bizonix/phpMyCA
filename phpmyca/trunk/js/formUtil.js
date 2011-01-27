@@ -15,28 +15,27 @@ var caId = null;
  *   The form element containing the CA id.
  * @param url
  *   Url to load into the message passing frame.
- * @return void
+ * @return bool
  */
 function caSelected(elem,url) {
-	if (!elem.name || elem.name !== 'caId') {
-		return false;
-		}
-	if (!isString(url)) {
-		return false;
-		}
-	if (!elem.value) {
-		return false;
-		}
-	if (elem.value == caId) {
-		return true;
-		}
-	if (!messageFrameExists()) {
-		return false;
-		}
+	if (!elem.name || elem.name !== 'caId') { return false; }
+	if (!isString(url)) { return false; }
+	if (!elem.value) { return false; }
+	if (elem.value == caId) { return true; }
+	if (!messageFrameExists()) { return false; }
 	// set current caId
 	caId = elem.value;
 	url += caId;
+	// if it is self, just clear the form
+	if (caId == 'self') {
+		// get the current index so we can switch it back...
+		var curIndex = elem.selectedIndex;
+		clearForm(document.addcert);
+		elem.selectedIndex = curIndex;
+		return true;
+		}
 	top.frames.messages.location = url;
+	return true;
 	}
 
 /**
