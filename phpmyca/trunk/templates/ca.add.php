@@ -8,6 +8,14 @@
 (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
 // breadcrumb
 $qs_back = $this->getMenuQs(MENU_CERTS_CA);
+
+// message passing url when a CA is selected
+$popUrl = $this->getPopulateFormDataQs(WA_ACTION_CA_POPULATE_FORM,0);
+
+// Add in form utility javascript
+$this->htmlJsAdd('js/formUtil.js');
+
+// footer links
 $this->addMenuLink($qs_back,'Cancel','redoutline');
 $this->addMenuLink('javascript:clearForm(document.addcert);','Clear Form','greenoutline');
 $this->addMenuLink('javascript:document.addcert.submit();','Create CA','greenoutline');
@@ -27,7 +35,7 @@ CA and provide the CA cert passphrase if required.
 	<TR>
 		<TH>Issuer</TH>
 		<TD>
-			<?= $this->getFormSelectCa('caId',$val); ?>
+			<?= $this->getFormSelectCa('caId',$val,'caSelected(this,\'' . $popUrl . '\');'); ?>
 		</TD>
 		<TD>
 			Optional - generate as intermediate cert
@@ -131,4 +139,5 @@ Optionally specify a passphrase for the private key.
 	</TR>
 </TABLE>
 <?= $this->getFormFooter(); ?>
+<?= $this->getMessageFrame(); ?>
 <?= $this->getPageFooter(); ?>

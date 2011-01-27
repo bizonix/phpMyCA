@@ -2452,6 +2452,46 @@ public function moduleRequired($modules=null) {
 	}
 
 /**
+ * Populate a form in the top frame with data from specified CA.
+ * @return void
+ */
+public function populateCaFormData() {
+	$id = $this->html->crumbGet(WA_QS_ID);
+	if (!is_numeric($id) or $id < 1) { die('INVALID ID'); }
+	$this->moduleRequired('ca');
+	$this->ca->resetProperties();
+	$data = $this->ca->queryById($id);
+	if (!is_array($data)) { die('INVALID ID'); }
+	// these are the properties we will populate.
+	$props = array('OrgName','OrgUnitName','LocalityName','StateName',
+	'CountryName');
+	$h = array();
+	$h[] = '<script type="text/javascript">';
+	$h[] = 'function populateFormData(varName,varVal) {';
+	$h[] = 'if (!typeof(varName) == \'string\') { return false; }';
+	$h[] = 'if (!typeof(varVal) == \'string\') { return false; }';
+	$h[] = 'var el = top.document.getElementsByName(varName)[0];';
+	$h[] = 'if (!el) { return false; }';
+	$h[] = 'el.value=varVal';
+	$h[] = '}';
+	foreach($props as $prop) {
+		if (isset($data[$prop])) {
+			$h[] = 'populateFormData("' . $prop . '","' . $data[$prop] . '");';
+			}
+		}
+	// try to fill in the total days...
+	$days = $this->dateToDays($data['ValidTo']);
+	if (is_numeric($days) and $days > 2) {
+		$days--;
+		} else {
+		$days = '';
+		}
+	$h[] = 'populateFormData("Days","' . $days . '");';
+	$h[] = '</script>';
+	die(implode("\n",$h) . "\n");
+	}
+
+/**
  * If the webapp has not been minimally instantiated, die with an error message
  * @return void
  */

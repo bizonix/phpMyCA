@@ -654,6 +654,22 @@ public function getMenuRequest() {
 	}
 
 /**
+ * Draw inline frames used for message passing
+ */
+function getMessageFrame($debug=false) {
+	$f  = ' src="blank.php" marginwidth="0" ';
+	$f .= 'marginheight="0" frameborder="0" ';
+	$f .= ($debug === true) ? 'height="200" width="500"' : 'height="0" width="0"';
+	$f .= '></IFRAME>';
+	$d  = ($debug === true) ? 'messageFrameDebug' : 'messageFrame';
+	$h   = array();
+	$h[] = '<DIV id="' . $d . '">';
+	$h[] = '<IFRAME name="messages"' . $f;
+	$h[] = '</DIV>';
+	return implode("\n",$h) . "\n";
+	}
+
+/**
  * Obtain post data from either an uploaded file or form field.
  * Handles multi-part form submits where data can be submitted either in
  * form fields or uploaded files.  Input derived from uploaded files will
@@ -803,6 +819,31 @@ public function getPageHeader($skipBody=false,$addLinks=false) {
  */
 public function getPageTitle() {
 	return (is_string($this->pageTitle)) ? $this->pageTitle : false;
+	}
+
+/**
+ * Retrieve query string to generate a data dump url request.
+ *
+ * Only dump request parameters will make it into the returned query string.
+ * If ID is specified and numeric, it will be added.  If ID is false or not
+ * numeric, no ID will be added.  If ID is 0, a partial ID= will be returned on
+ * the tail of of the query string, to be handled by the caller.
+ *
+ * @param $action
+ * @param $id
+ * @return string
+ */
+public function getPopulateFormDataQs($action=null,$id=false) {
+	$tmp_ar = array();
+	$tmp_ar[]  = WA_QS_ACTION . '=' . $action;
+	if (!($id === false) and is_numeric($id) and $id > -1) {
+		if ($id > 0) {
+			$tmp_ar[] = WA_QS_ID . '=' . $id;
+			} else {
+			$tmp_ar[] = WA_QS_ID . '=';
+			}
+		}
+	return './?' . implode('&',$tmp_ar);
 	}
 
 /**
@@ -1125,9 +1166,11 @@ public function varIsSet($varname=null) {
  * Get form element to select signing ca
  * @param string $selectName
  * @param string $default
+ * @param string $onChange
+ *   String - Optional javascript function to call for the onChange() event.
  * @return string html selection widget
  */
-public function getFormSelectCa($selectName=null,$default=null) {
+public function getFormSelectCa($selectName=null,$default=null,$onChange=null) {
 	global $_WA;
 	if (empty($selectName)) { return "\n"; }
     $_WA->moduleRequired('ca');
@@ -1155,7 +1198,12 @@ public function getFormSelectCa($selectName=null,$default=null) {
 		$q[] = $ar;
 		}
 	$h = array();
-	$h[] = '<SELECT NAME="' . $selectName . '">';
+	$sel = '<SELECT NAME="' . $selectName . '"';
+	if (is_string($onChange)) {
+		$sel .= ' onChange="' . $onChange . '"';
+		}
+	$sel .= '>';
+	$h[] = $sel;
 	foreach($q as $row) {
 		$id = $row['Id'];
 		$txt = array();

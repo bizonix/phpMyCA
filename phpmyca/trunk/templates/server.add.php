@@ -13,6 +13,12 @@ $qs_back = $this->getMenuQs(MENU_CERTS_SERVER);
 $this->addMenuLink($qs_back,'Cancel','redoutline');
 $this->addMenuLink('javascript:clearForm(document.addcert);','Clear Form','greenoutline');
 $this->addMenuLink('javascript:document.addcert.submit();','Create Server Certificate','greenoutline');
+
+// message passing url when a CA is selected
+$popUrl = $this->getPopulateFormDataQs(WA_ACTION_CA_POPULATE_FORM,0);
+
+// Add in form utility javascript
+$this->htmlJsAdd('js/formUtil.js');
 ?>
 <?= $this->getPageHeader(false,true); ?>
 <?= $this->getFormHeader('addcert'); ?>
@@ -30,7 +36,7 @@ and all of the client certificates that might be signed with this certificate.
 	<TR>
 		<TH>Signing Certificate Authority</TH>
 		<TD COLSPAN="2">
-			<?= $this->getFormSelectCa('caId',$val); ?>
+			<?= $this->getFormSelectCa('caId',$val,'caSelected(this,\'' . $popUrl . '\');'); ?>
 		</TD>
 	</TR>
 <? $val = (isset($_POST['caPassPhrase'])) ? $_POST['caPassPhrase'] : ''; ?>
@@ -135,4 +141,5 @@ and all of the client certificates that might be signed with this certificate.
 	</TR>
 </TABLE>
 <?= $this->getFormFooter(); ?>
+<?= $this->getMessageFrame(); ?>
 <?= $this->getPageFooter(); ?>

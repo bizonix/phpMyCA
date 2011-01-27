@@ -14,6 +14,15 @@ if (!is_a($_WA,'webapp') or !method_exists($_WA,'requireWebapp')) {
 	}
 $_WA->requireWebapp();
 
+// Take care of form populate requests
+if (is_string($_WA->html->getActionRequest())) {
+	switch($_WA->html->getActionRequest()) {
+		case WA_ACTION_CA_POPULATE_FORM:
+			die($_WA->populateCaFormData());
+		break;
+		}
+	}
+
 // Did the user request a menu?
 if (is_string($_WA->html->getMenuRequest())) {
 	if ($_WA->isMenu($_WA->html->getMenuRequest())) {

@@ -9,6 +9,12 @@
 // breadcrumb
 $qs_back = $this->getMenuQs(MENU_CERTS_CLIENT);
 
+// message passing url when a CA is selected
+$popUrl = $this->getPopulateFormDataQs(WA_ACTION_CA_POPULATE_FORM,0);
+
+// Add in form utility javascript
+$this->htmlJsAdd('js/formUtil.js');
+
 // footer links
 $this->addMenuLink($qs_back,'Cancel','redoutline');
 $this->addMenuLink('javascript:clearForm(document.addcert);','Clear Form','greenoutline');
@@ -29,7 +35,7 @@ changes cannot be made later without having to generate a new certificate.
 	<TR>
 		<TH>Signing Certificate Authority</TH>
 		<TD COLSPAN="2">
-			<?= $this->getFormSelectCa('caId',$val); ?>
+			<?= $this->getFormSelectCa('caId',$val,'caSelected(this,\'' . $popUrl . '\');'); ?>
 		</TD>
 	</TR>
 <? $val = (isset($_POST['caPassPhrase'])) ? $_POST['caPassPhrase'] : ''; ?>
@@ -94,4 +100,5 @@ changes cannot be made later without having to generate a new certificate.
 	</TR>
 </TABLE>
 <?= $this->getFormFooter(); ?>
+<?= $this->getMessageFrame(); ?>
 <?= $this->getPageFooter(); ?>

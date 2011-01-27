@@ -35,6 +35,7 @@ define('WA_ACTION_CA_EXPORT_ALL',     'caexa');
 define('WA_ACTION_CA_IMPORT',         'caimp');
 define('WA_ACTION_CA_LIST',           'cal');
 define('WA_ACTION_CA_PKCS12',         'pkcs12');
+define('WA_ACTION_CA_POPULATE_FORM',  'popcaform');
 define('WA_ACTION_CA_REVOKE',         'carev');
 define('WA_ACTION_CA_VIEW',           'cav');
 // Client cert action strings
@@ -68,6 +69,11 @@ define('WA_ACTION_CSR_SERVER_EDIT',        'csrse');
 define('WA_ACTION_CSR_SERVER_ENCRYPT',     'csrsenc');
 define('WA_ACTION_CSR_SERVER_LIST',        'csrsl');
 define('WA_ACTION_CSR_SERVER_VIEW',        'csrsv');
+// Data dump action strings
+define('WA_QS_FORMAT',          'format');
+define('WA_FORMAT_JAVASCRIPT',  'js');
+define('WA_FORMAT_CSV',         'csv');
+define('WA_FORMAT_XML',         'xml');
 // Misc action strings
 define('WA_ACTION_INSTALL',           'install');
 define('WA_ACTION_BROWSER_IMPORT',    'bimp');

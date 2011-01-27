@@ -110,6 +110,23 @@ td.expire90 {
 	text-align: right;
 	width: 100%;
 	}
+#messageFrame {
+	background-color: transparent;
+	color: transparent;
+	white-space: nowrap;
+	position: absolute;
+	left: -5px;
+	top: -5px;
+	overflow: hidden;
+	width: 0px;
+	height: 0px;
+	margin: 0px;
+	padding: 0px;
+	z-index: -1;
+	}
+#messageFrameDebug {
+	background-color: #d2d2d2;
+	}
 #pageContainer {
 	width: 100%;
 	padding: 10px;
