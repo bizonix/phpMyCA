@@ -24,7 +24,7 @@ function caSelected(elem,url) {
 	if (!isString(url)) {
 		return false;
 		}
-	if (!elem.value || isNaN(elem.value)) {
+	if (!elem.value) {
 		return false;
 		}
 	if (elem.value == caId) {
@@ -55,4 +55,19 @@ function isString(a) {
 function messageFrameExists() {
 	if (top.frames.length < 1) { return false; }
 	return (!top.frames.messages) ? false : true;
+	}
+
+/**
+ * Populate specified form field with specified value.
+ * @param varName
+ * @param varVal
+ * @return bool
+ */
+function populateField(varName,varVal) {
+	if (typeof(varName) !== 'string') { alert('1'); return false; }
+	if (typeof(varVal) !== 'string') { alert('2'); return false; }
+	var el = document.getElementsByName(varName)[0];
+	if (!el) { return false; }
+	el.value = varVal;
+	return true;
 	}

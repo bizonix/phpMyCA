@@ -2467,17 +2467,10 @@ public function populateCaFormData() {
 	'CountryName');
 	$h = array();
 	$h[] = '<script type="text/javascript">';
-	$h[] = 'function populateFormData(varName,varVal) {';
-	$h[] = 'if (!typeof(varName) == \'string\') { return false; }';
-	$h[] = 'if (!typeof(varVal) == \'string\') { return false; }';
-	$h[] = 'var el = top.document.getElementsByName(varName)[0];';
-	$h[] = 'if (!el) { return false; }';
-	$h[] = 'el.value=varVal';
-	$h[] = '}';
 	foreach($props as $prop) {
-		if (isset($data[$prop])) {
-			$h[] = 'populateFormData("' . $prop . '","' . $data[$prop] . '");';
-			}
+		$val = (isset($data[$prop])) ? $data[$prop] : '';
+		if (!is_string($val)) { $val = ''; }
+		$h[] = 'top.populateField("' . $prop . '","' . $val . '");';
 		}
 	// try to fill in the total days...
 	$days = $this->dateToDays($data['ValidTo']);
@@ -2486,7 +2479,7 @@ public function populateCaFormData() {
 		} else {
 		$days = '';
 		}
-	$h[] = 'populateFormData("Days","' . $days . '");';
+	$h[] = 'top.populateField("Days","' . $days . '");';
 	$h[] = '</script>';
 	die(implode("\n",$h) . "\n");
 	}
