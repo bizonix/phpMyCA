@@ -113,6 +113,42 @@ public function getPemCertById($certId=null) {
 	}
 
 /**
+ * Does the populated cert have a certificate signing request?
+ * @return bool
+ */
+public function hasCsr() {
+	if (!$this->populated) { return false; }
+	return (strpos($this->getProperty('CSR'),'CERTIFICATE REQUEST') === false) ? false : true;
+	}
+
+/**
+ * Does the populated cert have a private key?
+ * @return bool
+ */
+public function hasPrivateKey() {
+	if (!$this->populated) { return false; }
+	return (strpos($this->getProperty('PrivateKey'),'PRIVATE KEY') === false) ? false : true;
+	}
+
+/**
+ * Does the populated cert have a public key?
+ * @return bool
+ */
+public function hasPublicKey() {
+	if (!$this->populated) { return false; }
+	return (strpos($this->getProperty('PublicKey'),'PUBLIC KEY') === false) ? false : true;
+	}
+
+/**
+ * Is the private key of the populated object encrypted?
+ * @return bool
+ */
+public function isEncrypted() {
+	if (!$this->hasPrivateKey()) { return false; }
+	return (strpos($this->getProperty('PrivateKey'),'ENCRYPTED') === false) ? false : true;
+	}
+
+/**
  * Is populated cert expired?
  * @param $days
  *   Optionally specify number of days in the future to check
@@ -127,6 +163,14 @@ public function isExpired($days = null) {
 	$expireDate = $this->getProperty('ValidTo');
 	$expireTime = ($expireDate) ? strtotime($expireDate) : false;
 	return ($expireTime && ($now >= $expireTime));
+	}
+
+/**
+ * Can the populated cert be revoked?
+ * @return bool
+ */
+public function isRevokable() {
+	return ($this->hasPrivateKey() && !$this->isRevoked());
 	}
 
 /**
