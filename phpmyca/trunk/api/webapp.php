@@ -33,7 +33,7 @@ var $server    = null;
  * Classes of objects this webapp will use
  */
 private $classCa        = 'phpmycaCaCert';
-private $classCert      = 'phpmycaCert';
+private $classCert      = 'phpmycaParse';
 private $classClient    = 'phpmycaClientCert';
 private $classCsrServer = 'phpmycaCsrServer';
 private $classHtml      = 'webappHtml';

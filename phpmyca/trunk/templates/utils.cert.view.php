@@ -75,7 +75,7 @@ Upload a certificate or copy and paste the certificate into the form field below
 <? } ?>
 <? if (is_array($cert_parse)) { ?>
 	<TR>
-		<TH COLSPAN="2">Output of phpmycaCert::parseCert()</TH>
+		<TH COLSPAN="2">Output of phpmycaParse::parseCert()</TH>
 	</TR>
 	<TR>
 		<TD COLSPAN="2"><PRE><? print_r($cert_parse); ?></PRE></TD>
@@ -83,7 +83,7 @@ Upload a certificate or copy and paste the certificate into the form field below
 <? } ?>
 <? if (is_array($cert_asn)) { ?>
 	<TR>
-		<TH COLSPAN="2">Output of phpmycaCert::parseAsn()</TH>
+		<TH COLSPAN="2">Output of phpmycaParse::parseAsn()</TH>
 	</TR>
 	<TR>
 		<TD COLSPAN="2"><PRE><? print_r($cert_asn); ?></PRE></TD>

@@ -69,7 +69,7 @@ public function __construct() {
 
 /**
  * Does a parsed cert meet import requirements?
- * @param array $parsedCert (returned by phpmycaCert::parseCert())
+ * @param array $parsedCert (returned by phpmycaParse::parseCert())
  * @return bool true on success
  * @return string error message on failures
  */

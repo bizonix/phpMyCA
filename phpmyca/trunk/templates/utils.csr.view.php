@@ -64,7 +64,7 @@ Upload a CSR or copy and paste the CSR into the form field below.
 <? } ?>
 <? if (is_array($csr_asn)) { ?>
 	<TR>
-		<TH COLSPAN="2">Output of phpmycaCert::parseAsn()</TH>
+		<TH COLSPAN="2">Output of phpmycaParse::parseAsn()</TH>
 	</TR>
 	<TR>
 		<TD COLSPAN="2"><PRE><? print_r($csr_asn); ?></PRE></TD>

@@ -8,7 +8,7 @@
  */
 (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
 
-class phpmycaCert {
+class phpmycaParse {
 
 /**
  * Object Identifers to name array.
