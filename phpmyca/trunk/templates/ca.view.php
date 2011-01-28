@@ -47,7 +47,6 @@ $qs_revoke      = $this->getActionQs(WA_ACTION_CA_REVOKE);
 
 // import cert links
 $qs_import_pem = $this->getActionQs(WA_ACTION_BROWSER_IMPORT);
-$isEncrypted   = (strpos($data->getProperty('PrivateKey'),'ENCRYPTED') === false) ? false : true;
 
 // expired or revoked?
 $expired = ($data->isExpired());
@@ -66,9 +65,11 @@ if (!$expired and !$revoked) {
 
 // footer links
 if (!$expired and !$revoked) {
-	$this->addMenuLink($qs_revoke,'Revoke','redoutline');
-	if ($data->getProperty('PrivateKey')) {
-		if ($isEncrypted) {
+	if ($data->isRevokable()) {
+		$this->addMenuLink($qs_revoke,'Revoke','redoutline');
+		}
+	if ($data->hasPrivateKey()) {
+		if ($data->isEncrypted()) {
 			$qs = $this->getActionQs(WA_ACTION_CHANGE_PASS);
 			$this->addMenuLink($qs,'Change Private Key Password','greenoutline');
 			$qs = $this->getActionQs(WA_ACTION_DECRYPT);
@@ -346,7 +347,7 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 	</TR>
 </TABLE>
 </DIV>
-<? if ($data->getProperty('PrivateKey')) { ?>
+<? if ($data->hasPrivateKey()) { ?>
 <?
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'

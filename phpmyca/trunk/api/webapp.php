@@ -1927,6 +1927,13 @@ public function getPageCaRevoke() {
 		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
 		die($this->getPageCaView());
 		}
+	// Can it be revoked?
+	if (!$this->ca->isRevokable()) {
+		$m = 'Certificate cannot be revoked.  Either the private key is missing'
+		. ' or it has already been revoked.';
+		$this->html->errorMsgSet($m);
+		die($this->getPageCaView());
+		}
 	// Get list of other ca certs this ca has signed.
 	$caCerts = $this->ca->getIssuerSubjects($id);
 	if (!is_array($caCerts)) {
@@ -2144,6 +2151,13 @@ public function getPageClientRevoke() {
 	// Is it already expired?
 	if ($this->client->isExpired()) {
 		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
+		die($this->getPageClientView());
+		}
+	// Can it be revoked?
+	if (!$this->client->isRevokable()) {
+		$m = 'Certificate cannot be revoked.  Either the private key is missing'
+		. ' or it has already been revoked.';
+		$this->html->errorMsgSet($m);
 		die($this->getPageClientView());
 		}
 	// Have they confirmed?
@@ -2364,6 +2378,13 @@ public function getPageServerRevoke() {
 	// Is it already expired?
 	if ($this->server->isExpired()) {
 		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
+		die($this->getPageServerView());
+		}
+	// Can it be revoked?
+	if (!$this->server->isRevokable()) {
+		$m = 'Certificate cannot be revoked.  Either the private key is missing'
+		. ' or it has already been revoked.';
+		$this->html->errorMsgSet($m);
 		die($this->getPageServerView());
 		}
 	// Have they confirmed?

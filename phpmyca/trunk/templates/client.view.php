@@ -30,7 +30,6 @@ $qs_issuer   = $this->getMenuQs(MENU_CERTS_CA)
              . '&' . WA_QS_ID . '=' . $data->getProperty('ParentId');
 $qs_bundle   = $this->getActionQs(WA_ACTION_BUNDLE);
 $qs_revoke   = $this->getActionQs(WA_ACTION_CLIENT_REVOKE);
-$isEncrypted = (strpos($data->getProperty('PrivateKey'),'ENCRYPTED') === false) ? false : true;
 
 // expired or revoked?
 $expired = ($data->isExpired());
@@ -49,9 +48,11 @@ if (!$expired and !$revoked) {
 
 // footer links
 if (!$expired and !$revoked) {
-	$this->addMenuLink($qs_revoke,'Revoke','redoutline');
-	if ($data->getProperty('PrivateKey')) {
-		if ($isEncrypted) {
+	if ($data->isRevokable()) {
+		$this->addMenuLink($qs_revoke,'Revoke','redoutline');
+		}
+	if ($data->hasPrivateKey()) {
+		if ($data->isEncrypted()) {
 			$qs = $this->getActionQs(WA_ACTION_CHANGE_PASS);
 			$this->addMenuLink($qs,'Change Private Key Password','greenoutline');
 			$qs = $this->getActionQs(WA_ACTION_DECRYPT);
@@ -226,7 +227,7 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 </TABLE>
 </DIV>
 <?
-if ($data->getProperty('PrivateKey')) {
+if ($data->hasPrivateKey()) {
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
     . 'Private Key</A>';
@@ -243,7 +244,7 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 </DIV>
 <? } ?>
 <?
-if ($data->getProperty('PublicKey')) {
+if ($data->hasPublicKey()) {
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
     . 'Public Key</A>';
@@ -259,7 +260,7 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 </TABLE>
 </DIV>
 <? } ?>
-<? if ($data->getProperty('CSR')) { ?>
+<? if ($data->hasCsr()) { ?>
 <?
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
