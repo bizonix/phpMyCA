@@ -2587,7 +2587,7 @@ private function moduleLoad($module=null) {
 		case 'parse':
 			$o = 'parse';
 			$class = $this->classParse;
-			$inc = WEBAPP_API . '/cert.php';
+			$inc = WEBAPP_API . '/parse.php';
 		break;
 		case 'client':
 			$o = 'client';
