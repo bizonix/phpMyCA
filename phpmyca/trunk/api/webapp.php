@@ -2424,6 +2424,8 @@ public function getPageServerView() {
 		$this->html->errorMsgSet('Failed to locate issuer information.');
 		die($this->html->loadTemplate('server.view.php'));
 		}
+$this->html->setVar('server',new phpmycaCert($this->server));
+
 	$this->html->setVar('data',&$this->server);
 	$this->html->setVar('issuer',&$this->ca);
 	die($this->html->loadTemplate('server.view.php'));
@@ -2576,41 +2578,49 @@ private function getSignerId(&$pemCert=null) {
  */
 private function moduleLoad($module=null) {
 	$db_required = false;
-	$inc = false;
+	$load        = array();
 	switch($module) {
 		case 'ca':
 			$o = 'ca';
 			$class = $this->classCa;
 			$db_required = true;
-			$inc = WEBAPP_API . '/ca.php';
+			$load['phpmycaCert']  = WEBAPP_API . '/cert.php';
+			$load['phpmycaDboCa'] = WEBAPP_API . '/db/dbo.ca.php';
+			$load[$class]         = WEBAPP_API . '/ca.php';
 		break;
 		case 'parse':
 			$o = 'parse';
 			$class = $this->classParse;
-			$inc = WEBAPP_API . '/parse.php';
+			$load[$class] = WEBAPP_API . '/parse.php';
 		break;
 		case 'client':
 			$o = 'client';
 			$class = $this->classClient;
-			$inc = WEBAPP_API . '/client.php';
 			$db_required = true;
+			$load['phpmycaCert']      = WEBAPP_API . '/cert.php';
+			$load['phpmycaDboClient'] = WEBAPP_API . '/db/dbo.client.php';
+			$load[$class]             = WEBAPP_API . '/client.php';
 		break;
 		case 'csrserver':
 			$o = 'csrserver';
 			$class = $this->classCsrServer;
-			$inc = WEBAPP_API . '/csr.server.php';
 			$db_required = true;
+			$load['phpmycaCert']         = WEBAPP_API . '/cert.php';
+			$load['phpmycaDboCsrServer'] = WEBAPP_API . '/db/dbo.csr.server.php';
+			$load[$class]                = WEBAPP_API . '/csr.server.php';
 		break;
 		case 'html':
 			$o = 'html';
 			$class = $this->classHtml;
-			$inc = WEBAPP_API . '/html.php';
+			$load[$class] = WEBAPP_API . '/html.php';
 		break;
 		case 'server':
 			$o = 'server';
 			$class = $this->classServer;
-			$inc = WEBAPP_API . '/server.php';
 			$db_required = true;
+			$load['phpmycaCert']      = WEBAPP_API . '/cert.php';
+			$load['phpmycaDboServer'] = WEBAPP_API . '/db/dbo.server.php';
+			$load[$class]             = WEBAPP_API . '/server.php';
 		break;
 		default:
 			return false;
@@ -2618,20 +2628,34 @@ private function moduleLoad($module=null) {
 		}
 	if (!isset($o) or !is_string($o)) { return false; }
 	if (!isset($class) or !is_string($class)) { return false; }
-	if (is_a($this->$o,$class)) { return true; }
-	// Require the include if needed...
-	if (is_string($inc) and is_file($inc)) { require($inc); }
-	if (!class_exists($class,false))   { return false; }
-	if (!property_exists($this,$o)) { return false; }
+	if (!property_exists($this,$o))   { return false; }
+	if ($this->$o instanceof $class) { return true; }
+	//
+	// Load database prerequisite classes if needed.
+	//
+	if ($db_required and !class_exists('phpmycadbo', false)) {
+		require(WEBAPP_API . '/db/dbo.php');
+		}
+	//
+	// Load prerequiste classes
+	//
+	foreach($load as $preClass => $inc) {
+		if (class_exists($preClass,false)) { continue; }
+		if (is_string($inc) and is_readable($inc)) { require($inc); }
+		if (!class_exists($preClass,false)) { return false; }
+		}
+	// Our class should be available now, if not, we got problems.
+	if (!class_exists($class,false)) { return false; }
 	$this->$o = new $class();
+	// Pass on database settings if it is a db object
 	if ($db_required === true) {
 		$this->$o->setDatabaseHost(WEBAPP_DB_HOST);
 		$this->$o->setDatabase(WEBAPP_DB_NAME);
 		$this->$o->setDatabaseUser(WEBAPP_DB_USER);
 		$this->$o->setDatabasePass(WEBAPP_DB_PASS);
 		}
-	if (!is_object($this->$o)) { return false; }
-	return true;
+	// final check
+	return ($this->$o instanceof $class);
 	}
 
 /**

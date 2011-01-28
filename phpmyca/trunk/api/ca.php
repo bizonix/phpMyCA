@@ -8,8 +8,6 @@
  */
 (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
 
-require(WEBAPP_API . '/db/dbo.ca.php');
-
 class phpmycaCaCert extends phpmycaDboCa {
 
 var $actionQsExport    = false;

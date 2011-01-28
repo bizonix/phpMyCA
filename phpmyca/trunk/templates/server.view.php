@@ -12,51 +12,58 @@ if (!is_a($data,'phpmycaServerCert')) {
 	$m = 'Required data is missing, cannot continue.';
 	die($this->getPageError($m));
 	}
+
+$server =& $this->getVar('server');
+if (!($server instanceof phpmycaCert)) {
+	$m = 'Server cert is missing, cannot continue.';
+	die($this->getPageError($m));
+	}
+
 if (is_a($this->getVar('issuer'),'phpmycaCaCert')) {
 	$issuer =& $this->getVar('issuer');
 	} else {
 	$issuer = false;
 	}
 
-$hasContact = ($data->getProperty('CountryName') or
-               $data->getProperty('EmailAddress') or
-               $data->getProperty('LocalityName') or
-               $data->getProperty('OrgName') or
-               $data->getProperty('OrgUnitName') or
-               $data->getProperty('StateName'));
+$hasContact = (!empty($server->CountryName) or
+               !empty($server->EmailAddress) or
+               !empty($server->LocalityName) or
+               !empty($server->OrgName) or
+               !empty($server->OrgUnitName) or
+               !empty($server->StateName));
 $qs_back     = $this->getActionQs($data->actionQsList);
 $qs_edit     = $this->getActionQs($data->actionQsEdit);
 $qs_issuer   = $this->getMenuQs(MENU_CERTS_CA)
              . '&' . WA_QS_ACTION . '=' . WA_ACTION_CA_VIEW
-             . '&' . WA_QS_ID . '=' . $data->getProperty('ParentId');
+             . '&' . WA_QS_ID . '=' . $server->ParentId;
 $qs_bundle   = $this->getActionQs(WA_ACTION_BUNDLE);
 $qs_pkcs12   = $this->getActionQs(WA_ACTION_SERVER_PKCS12);
 $qs_download = $this->getActionQs(WA_ACTION_BROWSER_IMPORT);
 $qs_revoke   = $this->getActionQs(WA_ACTION_SERVER_REVOKE);
 
 // expired or revoked?
-$expired = ($data->isExpired());
-$revoked = ($data->isRevoked());
+$expired = ($server->isExpired());
+$revoked = ($server->isRevoked());
 // set class for expired
 $expireClass = '';
 if (!$expired and !$revoked) {
-	if ($data->isExpired(30)) {
+	if ($server->isExpired(30)) {
 		$expireClass = ' class="expire30"';
-		} elseif ($data->isExpired(60)) {
+		} elseif ($server->isExpired(60)) {
 		$expireClass = ' class="expire60"';
-		} elseif ($data->isExpired(90)) {
+		} elseif ($server->isExpired(90)) {
 		$expireClass = ' class="expire90"';
 		}
 	}
 
 // footer links
 if (!$expired and !$revoked) {
-	if ($data->isRevokable()) {
+	if ($server->isRevokable()) {
 		$this->addMenuLink($qs_revoke,'Revoke','redoutline');
 		}
 	$this->addMenuLink($qs_download,'Download Cert','greenoutline');
-	if ($data->hasPrivateKey()) {
-		if ($data->isEncrypted()) {
+	if ($server->hasPrivateKey()) {
+		if ($server->isEncrypted()) {
 			$qs = $this->getActionQs(WA_ACTION_CHANGE_PASS);
 			$this->addMenuLink($qs,'Change Private Key Password','greenoutline');
 			$qs = $this->getActionQs(WA_ACTION_DECRYPT);
@@ -76,33 +83,33 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 	<TR>
 		<TH>Certificate ID</TH>
 		<TD>
-			<?= $data->getProperty('Id') . "\n"; ?>
+			<?= $server->Id . "\n"; ?>
 		</TD>
 	</TR>
 	<TR>
 		<TH>Description</TH>
 		<TD>
-			<?= $data->getProperty('Description') . "\n"; ?>
+			<?= $server->Description . "\n"; ?>
 		</TD>
 	</TR>
 	<TR>
 		<TH>Server (commonName)</TH>
 		<TD>
-			<?= $data->getProperty('CommonName') . "\n"; ?>
+			<?= $server->CommonName . "\n"; ?>
 		</TD>
 	</TR>
 <? if ($revoked) { ?>
 	<TR>
 		<TH>Date Revoked</TH>
 		<TD>
-			<?= $data->getProperty('RevokeDate'); ?>
+			<?= $server->RevokeDate; ?>
 		</TD>
 	</TR>
 <? } else { ?>
 	<TR>
 		<TH>Date Valid</TH>
 		<TD<?= $expireClass; ?>>
-			<?= $data->getProperty('ValidFrom') . ' to ' . $data->getProperty('ValidTo') . "\n"; ?>
+			<?= $server->ValidFrom . ' to ' . $server->ValidTo . "\n"; ?>
 		</TD>
 	</TR>
 <? } ?>
@@ -110,18 +117,19 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 	<TR>
 		<TH COLSPAN="2">Contact Information</TH>
 	</TR>
-<? if ($data->getProperty('EmailAddress')) { ?>
+<? if ($server->EmailAddress) { ?>
 	<TR>
 		<TH>Email Address</TH>
-		<TD><?= $data->getProperty('EmailAddress'); ?></TD>
+		<TD><?= $server->EmailAddress; ?></TD>
 	</TR>
 <? } ?>
-<? if ($data->getProperty('OrgName')) { ?>
+<? if ($server->OrgName) { ?>
 	<TR>
 		<TH>Organization</TH>
-		<TD><?= $data->getProperty('OrgName'); ?></TD>
+		<TD><?= $server->OrgName; ?></TD>
 	</TR>
 <? } ?>
+<? die('IAMHERE: ' . __FILE__ . ' line: ' . __LINE__); ?>
 <? if ($data->getProperty('OrgUnitName')) { ?>
 	<TR>
 		<TH>Organizational Unit</TH>

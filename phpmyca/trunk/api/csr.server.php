@@ -8,8 +8,6 @@
  */
 (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
 
-require(WEBAPP_API . '/db/dbo.csr.server.php');
-
 class phpmycaCsrServer extends phpmycaDboCsrServer {
 
 var $actionQsExport    = false;
