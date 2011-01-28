@@ -34,16 +34,16 @@ function getPageCertView() {
 		}
 	// Ok, did they provide a hostname port, or file/cut-and-paste?
 	if (is_string($pem)) {
-		$_WA->moduleRequired('cert');
+		$_WA->moduleRequired('parse');
 		$cert_subject = openssl_x509_parse($pem,false);
-		$cert_parse = $_WA->cert->parseCert($pem);
+		$cert_parse = $_WA->parse->parseCert($pem);
 		$key = openssl_pkey_get_public($pem);
 		if (is_resource($key)) {
 			$cert_key = openssl_pkey_get_details($key);
 			}
-		$der = $_WA->cert->pemToDer($pem);
+		$der = $_WA->parse->pemToDer($pem);
 		if (!($der === false)) {
-			$asn = $_WA->cert->parseAsn($der);
+			$asn = $_WA->parse->parseAsn($der);
 			if (is_array($asn)) {
 				$cert_asn = $asn;
 				}
@@ -74,12 +74,12 @@ function getPageCsrView() {
 	// Check to see if they have provided a file.
 	$csr_pem = $_WA->html->parseCertificateRequest('csr_file','csr');
 	if (is_string($csr_pem)) {
-		$_WA->moduleRequired('cert');
+		$_WA->moduleRequired('parse');
 		$csr_subject = openssl_csr_get_subject($csr_pem,false);
 		$junk = preg_split('/(-----((BEGIN)|(END)) CERTIFICATE REQUEST-----)/',$csr_pem);
 		if (isset($junk[1])) {
 			$enc = base64_decode($junk[1]);
-			$csr_asn = $_WA->cert->parseAsn($enc);
+			$csr_asn = $_WA->parse->parseAsn($enc);
 			}
 		$key = openssl_csr_get_public_key($csr_pem);
 		if (is_resource($key)) {
@@ -114,8 +114,8 @@ function getPageDebugSigner() {
 	// Attempt to process the certificate
 	//
 	if (is_string($pem_cert)) {
-		$_WA->moduleRequired('cert');
-		$data = $_WA->cert->parseCert($pem_cert);
+		$_WA->moduleRequired('parse');
+		$data = $_WA->parse->parseCert($pem_cert);
 		if (!is_array($data)) {
 			$_WA->html->errorMsgSet('Failed to parse certificate.');
 			die($_WA->html->loadTemplate('utils.debug.signer.php'));
@@ -151,7 +151,7 @@ function getPageDebugSigner() {
 			$_WA->html->setVar('debug_txt', &$debug_txt);
 			die($_WA->html->loadTemplate('utils.debug.signer.php'));
 			}
-		$asn = $_WA->cert->parseAsn($dSig);
+		$asn = $_WA->parse->parseAsn($dSig);
 		if (!is_array($asn)) {
 			$_WA->html->errorMsgSet('Failed to parse ASN data: ' . $asn);
 			$_WA->html->setVar('debug_txt', &$debug_txt);
@@ -165,13 +165,13 @@ function getPageDebugSigner() {
 			die($_WA->html->loadTemplate('utils.debug.signer.php'));
 			}
 		$sighash = bin2hex($asn[1][1][1]);
-		$der = $_WA->cert->pemToDer($pem_cert);
+		$der = $_WA->parse->pemToDer($pem_cert);
 		if ($der === false) {
 			$_WA->html->setVar('debug_txt', &$debug_txt);
 			$_WA->html->errorMsgSet('Failed to convert cert to DER.');
 			die($_WA->html->loadTemplate('utils.debug.signer.php'));
 			}
-		$origSig = $_WA->cert->stripSignerAsn($der);
+		$origSig = $_WA->parse->stripSignerAsn($der);
 		if ($origSig === false) {
 			$_WA->html->setVar('debug_txt', &$debug_txt);
 			$_WA->html->errorMsgSet('Failed to extract sig from DER.');
@@ -228,19 +228,19 @@ function getPageIsCertSigner() {
 	$_WA->html->setVar('pem_issuer',$pem_issuer);
 	$_WA->html->setVar('pem_subject',$pem_subject);
 	// Did they give us valid certs?
-	$_WA->moduleRequired('cert');
-	$issuer_ar = $_WA->cert->parseCert($pem_issuer);
+	$_WA->moduleRequired('parse');
+	$issuer_ar = $_WA->parse->parseCert($pem_issuer);
 	if (!is_array($issuer_ar)) {
 		$_WA->html->errorMsgSet('Invalid issuer cert.');
 		die($_WA->html->loadTemplate('utils.cert.signer.php'));
 		}
-	$subject_ar = $_WA->cert->parseCert($pem_subject);
+	$subject_ar = $_WA->parse->parseCert($pem_subject);
 	if (!is_array($subject_ar)) {
 		$_WA->html->errorMsgSet('Invalid subject cert.');
 		die($_WA->html->loadTemplate('utils.cert.signer.php'));
 		}
 	// Do the deed...
-	$rc = $_WA->cert->isCertSigner($pem_subject,$pem_issuer);
+	$rc = $_WA->parse->isCertSigner($pem_subject,$pem_issuer);
 	if (!is_bool($rc)) {
 		$_WA->html->errorMsgSet($rc);
 		die($_WA->html->loadTemplate('utils.cert.signer.php'));
@@ -313,8 +313,8 @@ function uploadDer() {
 	$txt = (isset($_REQUEST['cert'])) ? $_REQUEST['cert'] : false;
 	$pem = $_WA->html->extractPemBlock($txt,'CERTIFICATE');
 	if (!is_string($pem)) { die(); }
-	$_WA->moduleRequired('cert');
-	$der = $_WA->cert->pemToDer($pem);
+	$_WA->moduleRequired('parse');
+	$der = $_WA->parse->pemToDer($pem);
 	if (!is_string($der)) { die(); }
 	header('Pragma: private');
 	header('Expires: 0');

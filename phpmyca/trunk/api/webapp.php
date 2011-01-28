@@ -23,17 +23,17 @@ class webapp {
  * Webapp object modules
  */
 var $ca        = null;
-var $cert      = null;
 var $client    = null;
 var $csrserver = null;
 var $html      = null;
+var $parse     = null;
 var $server    = null;
 
 /**
  * Classes of objects this webapp will use
  */
 private $classCa        = 'phpmycaCaCert';
-private $classCert      = 'phpmycaParse';
+private $classParse     = 'phpmycaParse';
 private $classClient    = 'phpmycaClientCert';
 private $classCsrServer = 'phpmycaCsrServer';
 private $classHtml      = 'webappHtml';
@@ -300,7 +300,7 @@ public function actionCaExportCerts() {
  */
 public function actionCaImport($pemCert=null,$privKey=null,$passPhrase=null,
                              $certRequest=null) {
-	$this->moduleRequired('ca,cert');
+	$this->moduleRequired('ca,parse');
 	// check arguments
 	if (!is_string($pemCert) or strlen($pemCert) < 1) {
 		return 'Must provide a valid PEM encoded CA certificate.';
@@ -313,13 +313,13 @@ public function actionCaImport($pemCert=null,$privKey=null,$passPhrase=null,
 	$certRequest = (is_string($certRequest) and strlen($certRequest) > 0)
 	               ? $certRequest : false;
 	// parse the cert
-	$pc = $this->cert->parseCert($pemCert);
+	$pc = $this->parse->parseCert($pemCert);
 	if (!is_array($pc)) { return 'Failed to parse certificate.'; }
 	$rc = $this->ca->meetsImportRequirements($pc);
 	if (!($rc === true)) {
 		return 'Cert does not meet import requirements: ' . $rc;
 		}
-	$rc = $this->cert->parsedCertIsCa($pc);
+	$rc = $this->parse->parsedCertIsCa($pc);
 	if (!($rc === true)) {
 		return 'The specified cert is not a CA certificate.';
 		}
@@ -350,7 +350,7 @@ public function actionCaImport($pemCert=null,$privKey=null,$passPhrase=null,
 		$pubKey = $ar['key'];
 		}
 	// Locate the issuer if it is not a self-signed cert
-	$isSelfSigned = $this->cert->isCertSigner($pemCert,$pemCert);
+	$isSelfSigned = $this->parse->isCertSigner($pemCert,$pemCert);
 	if (!($isSelfSigned === true)) {
 		$ca = $this->getSignerId($pemCert);
 		if (!is_array($ca) or count($ca) < 1) {
@@ -687,7 +687,7 @@ public function actionClientExportCerts() {
  */
 public function actionClientImport($pemCert=null,$privKey=null,$passPhrase=null,
                                  $certRequest=null) {
-	$this->moduleRequired('ca,cert,client');
+	$this->moduleRequired('ca,parse,client');
 	// check arguments
 	if (!is_string($pemCert) or strlen($pemCert) < 1) {
 		return 'Must provide a valid PEM encoded certificate.';
@@ -700,18 +700,18 @@ public function actionClientImport($pemCert=null,$privKey=null,$passPhrase=null,
 	$certRequest = (is_string($certRequest) and strlen($certRequest) > 0)
 	               ? $certRequest : false;
 	// parse the cert
-	$pc = $this->cert->parseCert($pemCert);
+	$pc = $this->parse->parseCert($pemCert);
 	if (!is_array($pc)) { return 'Failed to parse certificate.'; }
 	$rc = $this->client->meetsImportRequirements($pc);
 	if (!($rc === true)) {
 		return 'Cert does not meet import requirements: ' . $rc;
 		}
 	// no self-signed certs
-	$isSelfSigned = $this->cert->isCertSigner($pemCert,$pemCert);
+	$isSelfSigned = $this->parse->isCertSigner($pemCert,$pemCert);
 	if ($isSelfSigned === true) {
 		return 'Will not import self-signed certificates.';
 		}
-	$rc = $this->cert->parsedCertIsClient($pc);
+	$rc = $this->parse->parsedCertIsClient($pc);
 	if (!($rc === true)) {
 		return 'The specified cert is not a client certificate.';
 		}
@@ -1292,7 +1292,7 @@ public function actionServerExportCerts() {
  */
 public function actionServerImport($pemCert=null,$privKey=null,$passPhrase=null,
                                  $certRequest=null) {
-	$this->moduleRequired('ca,cert,server');
+	$this->moduleRequired('ca,parse,server');
 	// check arguments
 	if (!is_string($pemCert) or strlen($pemCert) < 1) {
 		return 'Must provide a valid PEM encoded CA certificate.';
@@ -1305,18 +1305,18 @@ public function actionServerImport($pemCert=null,$privKey=null,$passPhrase=null,
 	$certRequest = (is_string($certRequest) and strlen($certRequest) > 0)
 	               ? $certRequest : false;
 	// parse the cert
-	$pc = $this->cert->parseCert($pemCert);
+	$pc = $this->parse->parseCert($pemCert);
 	if (!is_array($pc)) { return 'Failed to parse certificate.'; }
 	$rc = $this->server->meetsImportRequirements($pc);
 	if (!($rc === true)) {
 		return 'Cert does not meet import requirements: ' . $rc;
 		}
 	// no self-signed certs
-	$isSelfSigned = $this->cert->isCertSigner($pemCert,$pemCert);
+	$isSelfSigned = $this->parse->isCertSigner($pemCert,$pemCert);
 	if ($isSelfSigned === true) {
 		return 'Will not import self-signed certificates.';
 		}
-	$rc = $this->cert->parsedCertIsSslServer($pc);
+	$rc = $this->parse->parsedCertIsSslServer($pc);
 	if (!($rc === true)) {
 		return 'The specified cert is not a SSL server certificate.';
 		}
@@ -2545,7 +2545,7 @@ private function getCaBundle($caId=null) {
  * @return bool false on failures
  */
 private function getSignerId(&$pemCert=null) {
-	$this->moduleRequired('ca,cert');
+	$this->moduleRequired('ca,parse');
 	if (!is_string($pemCert)) { return false; }
 	// Look up all CA certs
 	$this->ca->searchReset();
@@ -2562,7 +2562,7 @@ private function getSignerId(&$pemCert=null) {
 	// cert, so we store all hits in an array to return the candidates.
 	$hits = array();
 	foreach($caCerts as $row) {
-		if ($this->cert->isCertSigner($pemCert,$row['Certificate']) === true) {
+		if ($this->parse->isCertSigner($pemCert,$row['Certificate']) === true) {
 			$hits[] = $row;
 			}
 		}
@@ -2584,9 +2584,9 @@ private function moduleLoad($module=null) {
 			$db_required = true;
 			$inc = WEBAPP_API . '/ca.php';
 		break;
-		case 'cert':
-			$o = 'cert';
-			$class = $this->classCert;
+		case 'parse':
+			$o = 'parse';
+			$class = $this->classParse;
 			$inc = WEBAPP_API . '/cert.php';
 		break;
 		case 'client':
