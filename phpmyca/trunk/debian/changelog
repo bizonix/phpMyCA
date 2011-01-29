@@ -1,3 +1,9 @@
+phpmyca (0.0.5-1) stable; urgency=low
+
+  * phpmyca: Implement phpmycaCert class for common tasks to display certs.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
 phpmyca (0.0.4-1) stable; urgency=low
 
   * phpmyca: Auto-populate form fields when creating certificates.
