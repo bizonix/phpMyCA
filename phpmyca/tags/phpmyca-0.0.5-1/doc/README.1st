@@ -1,0 +1,15 @@
+This package should NOT be used in a non-trusted environment.  There is no
+authentication other than private key passwords.  It is meant to be used in
+a home or office environment to manage your own certificates.  The code has
+NOT been hardened or reviewed for security issues.  It has not been tested
+in with non-latin character encoding, and the database interaction uses
+simple addslashes().
+
+It requires php5, probably 5.3, with openssl and gmp (GNU Multiple Precision)
+support.
+
+What phpmyca DOES do, in my humble opinion, is provide a good utility to
+quickly deploy your own Certificate Authority that can generate certificates
+for servers or individuals.  It also provides multiple utilities to convert
+certificate formats, inspect certificates, validate certificate signers,
+etc.
