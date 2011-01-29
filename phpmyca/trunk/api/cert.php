@@ -38,28 +38,11 @@ public $ValidFrom        = null;
 public $ValidTo          = null;
 
 /**
- * The certificate type: ca, client, or server.
- * @var string
- * @see getType(), setType(), __construct()
- */
-private $certificateType = null;
-
-/**
- * The certificate issuer - phpmycaCert object
+ * The certificate issuer - (phpmycaCert object)
  * @var object
- * @see getIssuer(), setIssuer()
+ * @see setIssuer()
  */
-private $issuer = null;
-
-/**
- * The source of the currently populated certifcate.
- *
- * Will either be the class name of the object used to populate the certificate
- * or user.  User is used when the input is derived from form input.
- *
- * @var string
- */
-private $source = null;
+public $issuer = null;
 
 /**
  * Has the instance been populated with certificate data?
@@ -75,8 +58,10 @@ public $populated = false;
  * @param mixed $cert (optional)
  * @param string $type (optional) ca | client | server
  * @param string $source (optional) phpmycaDboCa | phpmycaDboClient
+ * @param bool $validate (optional) validate the input - default true
  */
-public function __construct(&$cert=null, $type=null, $source=null) {
+public function __construct(&$cert=null, $type=null, $source=null,
+                           $validate=true) {
 	// By default, if we can determine the cert type from $cert, ignore
 	// what the user specified ;)
 	if (is_object($cert) or is_array($cert)) {
@@ -93,7 +78,19 @@ public function __construct(&$cert=null, $type=null, $source=null) {
 			$source = 'user';
 			}
 		}
-	$this->populate($cert,$type,$source);
+	$this->populate($cert,$type,$source,$validate);
+	}
+
+/**
+ * Populate the issuer.
+ * @param phpmycaCert $cert
+ * @return bool
+ */
+public function setIssuer(&$cert=null) {
+	if (!($cert instanceof phpmycaCert)) { return false; }
+	if (!$cert->populated) { return false; }
+	$this->issuer = $cert;
+	return true;
 	}
 
 /**
@@ -174,6 +171,7 @@ public function isRevokable() {
  */
 public function isRevoked() {
 	if (!$this->populated) { return false; }
+	if ($this->RevokeDate == '0000-00-00 00:00:00') { return false; }
 	$revokeDate = $this->RevokeDate;
 	$revokeTime = ($revokeDate) ? strtotime($revokeDate) : false;
 	return ($revokeTime && (time() >= $revokeTime));
@@ -186,12 +184,15 @@ public function isRevoked() {
  *
  * @param mixed $cert
  * @param string $type
- * @param string source
+ * @param string $source
+ * @param bool $validate
  * @return bool
  */
-public function populate(&$cert=null, $type=null, $source=null) {
+public function populate(&$cert=null, $type=null, $source=null, $validate=true) {
 	$this->populated = false;
-	if (!$this->validatePopulateInput($cert,$type,$source)) { return false; }
+	if ($validate === true) {
+		if (!$this->validatePopulateInput($cert,$type,$source)) { return false; }
+		}
 	$props =& $this->getPropertyNames();
 	// null out existing properties
 	foreach($props as $prop) { $this->$prop = null; }

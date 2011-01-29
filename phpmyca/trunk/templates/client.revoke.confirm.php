@@ -7,14 +7,12 @@
  */
 (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
 
-$data =& $this->getVar('data');
-if (!($data instanceof phpmycaClientCert)) {
+$cert =& $this->getVar('cert');
+if (!($cert instanceof phpmycaCert)) {
 	$m = 'Required data is missing, cannot continue.';
 	die($this->getPageError($m));
 	}
-
-$qs_back   = $this->getActionQs($data->actionQsView);
-
+$qs_back   = $this->getActionQs(WA_ACTION_CLIENT_VIEW);
 
 // footer links
 $this->addMenuLink($qs_back,'Cancel','redoutline');
@@ -25,7 +23,7 @@ $this->addMenuLink('javascript:document.revokecert.submit();','Revoke','greenout
 <?= $this->getFormBreadCrumb(); ?>
 <INPUT TYPE="hidden" NAME="<? echo WA_QS_CONFIRM; ?>" VALUE="yes">
 <P>
-Are you absolutely certain you want to revoke the certificate for <?= $data->getProperty('CommonName'); ?>?
+Are you absolutely certain you want to revoke the certificate for <?= $cert->CommonName; ?>?
 This process is not reversible.
 </P>
 <?= $this->getFormFooter(); ?>

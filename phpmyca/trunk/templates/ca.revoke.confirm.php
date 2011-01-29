@@ -7,8 +7,8 @@
  */
 (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
 
-$data =& $this->getVar('data');
-if (!($data instanceof phpmycaCaCert)) {
+$cert =& $this->getVar('cert');
+if (!($cert instanceof phpmycaCert)) {
 	$m = 'Required data is missing, cannot continue.';
 	die($this->getPageError($m));
 	}
@@ -16,7 +16,7 @@ $caCerts     =& $this->getVar('caCerts');
 $clientCerts =& $this->getVar('clientCerts');
 $serverCerts =& $this->getVar('serverCerts');
 
-$qs_back   = $this->getActionQs($data->actionQsView);
+$qs_back   = $this->getActionQs(WA_ACTION_CA_VIEW);
 
 // Are there any subject certs?
 $hasCaCerts     = (is_array($caCerts) and count($caCerts) > 0);
@@ -34,7 +34,7 @@ $this->addMenuLink('javascript:document.revokecert.submit();','Revoke','greenout
 <?= $this->getFormBreadCrumb(); ?>
 <INPUT TYPE="hidden" NAME="<? echo WA_QS_CONFIRM; ?>" VALUE="yes">
 <P>
-Are you absolutely certain you want to revoke the certificate for <?= $data->getProperty('CommonName'); ?>?
+Are you absolutely certain you want to revoke the certificate for <?= $cert->CommonName; ?>?
 This process is not reversible.
 </P>
 <? if ($hasSubjects) { ?>
@@ -53,17 +53,17 @@ been revoked.
 		<TH>Org</TH>
 		<TH>Org Unit</TH>
 	</TR>
-<? foreach($caCerts as $cert) {
+<? foreach($caCerts as $c) {
 	$class = ($class == 'on') ? 'off' : 'on'; ?>
 	<TR>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['CommonName']; ?>
+			<?= $c->CommonName; ?>
 		</TD>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['OrgName']; ?>
+			<?= $c->OrgName; ?>
 		</TD>
 		<TD CLASS="<?= $class; ?>">
-			<?= substr($cert['OrgUnitName'],0,50); ?>...
+			<?= substr($c->OrgUnitName,0,50); ?>
 		</TD>
 	</TR>
 <? } ?>
@@ -80,17 +80,17 @@ been revoked.
 		<TH>Org</TH>
 		<TH>Org Unit</TH>
 	</TR>
-<? foreach($serverCerts as $cert) {
+<? foreach($serverCerts as &$c) {
 	$class = ($class == 'on') ? 'off' : 'on'; ?>
 	<TR>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['CommonName']; ?>
+			<?= $c->CommonName; ?>
 		</TD>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['OrgName']; ?>
+			<?= $c->OrgName; ?>
 		</TD>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['OrgUnitName']; ?>
+			<?= $c->OrgUnitName; ?>
 		</TD>
 	</TR>
 <? } ?>
@@ -107,24 +107,22 @@ been revoked.
 		<TH>Org</TH>
 		<TH>Org Unit</TH>
 	</TR>
-<? foreach($clientCerts as $cert) {
+<? foreach($clientCerts as &$c) {
 	$class = ($class == 'on') ? 'off' : 'on'; ?>
 	<TR>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['CommonName']; ?>
+			<?= $c->CommonName; ?>
 		</TD>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['OrgName']; ?>
+			<?= $c->OrgName; ?>
 		</TD>
 		<TD CLASS="<?= $class; ?>">
-			<?= $cert['OrgUnitName']; ?>
+			<?= $c->OrgUnitName; ?>
 		</TD>
 	</TR>
 <? } ?>
 </TABLE>
 <? } ?>
-
 <? } ?>
-
 <?= $this->getFormFooter(); ?>
 <?= $this->getPageFooter(); ?>

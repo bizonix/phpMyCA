@@ -113,95 +113,6 @@ public function getPemCertById($certId=null) {
 	}
 
 /**
- * Does the populated cert have a certificate signing request?
- * @return bool
- */
-public function hasCsr() {
-	if (!$this->populated) { return false; }
-	return (strpos($this->getProperty('CSR'),'CERTIFICATE REQUEST') === false) ? false : true;
-	}
-
-/**
- * Does the populated cert have a private key?
- * @return bool
- */
-public function hasPrivateKey() {
-	if (!$this->populated) { return false; }
-	return (strpos($this->getProperty('PrivateKey'),'PRIVATE KEY') === false) ? false : true;
-	}
-
-/**
- * Does the populated cert have a public key?
- * @return bool
- */
-public function hasPublicKey() {
-	if (!$this->populated) { return false; }
-	return (strpos($this->getProperty('PublicKey'),'PUBLIC KEY') === false) ? false : true;
-	}
-
-/**
- * Is the private key of the populated object encrypted?
- * @return bool
- */
-public function isEncrypted() {
-	if (!$this->hasPrivateKey()) { return false; }
-	return (strpos($this->getProperty('PrivateKey'),'ENCRYPTED') === false) ? false : true;
-	}
-
-/**
- * Is populated cert expired?
- * @param $days
- *   Optionally specify number of days in the future to check
- * @return boolean
- */
-public function isExpired($days = null) {
-	if (!$this->populated) { return false; }
-	$now = time();
-	if (is_numeric($days) and $days > 0) {
-		$now += (60 * 60 * 24) * $days;
-		}
-	$expireDate = $this->getProperty('ValidTo');
-	$expireTime = ($expireDate) ? strtotime($expireDate) : false;
-	return ($expireTime && ($now >= $expireTime));
-	}
-
-/**
- * Can the populated cert be revoked?
- * @return bool
- */
-public function isRevokable() {
-	return ($this->hasPrivateKey() && !$this->isRevoked());
-	}
-
-/**
- * Is populated cert revoked?
- * @return boolean
- */
-public function isRevoked() {
-	if (!$this->populated) { return false; }
-	$revokeDate = $this->getProperty('RevokeDate');
-	$revokeTime = ($revokeDate) ? strtotime($revokeDate) : false;
-	return ($revokeTime && (time() >= $revokeTime));
-	}
-
-/**
- * Populate new object from specified array (instead of db)
- * @param $props
- *   Array with keys (property names) and values (property values)
- * @return bool
- */
-public function populateFromArray(&$ar=null) {
-	if ($this->populated) { return false; }
-	if (!is_array($ar) or !count($ar)) { return false; }
-	$this->resetProperties();
-	foreach($ar as $prop => $val) {
-		$this->setProperty($prop,$val);
-		}
-	$this->populated = true;
-	return true;
-	}
-
-/**
  * Generic method to update currently populate object
  * @param bool $validate - pass it through validation first
  * @return string error message on failures
@@ -307,7 +218,5 @@ public function validate($skipId=false) {
 		}
 	return true;
 	}
-
 }
-
 ?>

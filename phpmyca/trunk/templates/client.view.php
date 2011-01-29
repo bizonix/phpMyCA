@@ -8,51 +8,54 @@
  */
 (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
 
-$data =& $this->getVar('data');
-if (!is_a($data,'phpmycaClientCert')) {
-	$m = 'Required data is missing, cannot continue.';
+$cert =& $this->getVar('cert');
+if (!($cert instanceof phpmycaCert)) {
+	$m = 'Server cert is missing, cannot continue.';
 	die($this->getPageError($m));
 	}
-if (is_a($this->getVar('issuer'),'phpmycaCaCert')) {
-	$issuer =& $this->getVar('issuer');
-	} else {
-	$issuer = false;
+
+$issuer =& $this->getVar('issuer');
+if (!($issuer instanceof phpmycaCert)) {
+	$m = 'Issuer cert is missing, cannot continue.';
+	die($this->getPageError($m));
 	}
 
-$hasContact = ($data->getProperty('EmailAddress') or
-               $data->getProperty('OrgName') or
-               $data->getProperty('OrgUnitName'));
-$qs_back     = $this->getActionQs($data->actionQsList);
-$qs_edit     = $this->getActionQs($data->actionQsEdit);
+$hasContact = (!empty($cert->EmailAddress) or
+               !empty($cert->OrgName) or
+               !empty($cert->OrgUnitName));
+$qs_back     = $this->getActionQs(WA_ACTION_CLIENT_LIST);
 $qs_pkcs12   = $this->getActionQs(WA_ACTION_CLIENT_PKCS12);
 $qs_issuer   = $this->getMenuQs(MENU_CERTS_CA)
              . '&' . WA_QS_ACTION . '=' . WA_ACTION_CA_VIEW
-             . '&' . WA_QS_ID . '=' . $data->getProperty('ParentId');
+             . '&' . WA_QS_ID . '=' . $cert->ParentId;
 $qs_bundle   = $this->getActionQs(WA_ACTION_BUNDLE);
 $qs_revoke   = $this->getActionQs(WA_ACTION_CLIENT_REVOKE);
 
 // expired or revoked?
-$expired = ($data->isExpired());
-$revoked = ($data->isRevoked());
+$expired = ($cert->isExpired());
+$revoked = ($cert->isRevoked());
 // set class for expired
 $expireClass = '';
 if (!$expired and !$revoked) {
-	if ($data->isExpired(30)) {
+	if ($cert->isExpired(30)) {
 		$expireClass = ' class="expire30"';
-		} elseif ($data->isExpired(60)) {
+		} elseif ($cert->isExpired(60)) {
 		$expireClass = ' class="expire60"';
-		} elseif ($data->isExpired(90)) {
+		} elseif ($cert->isExpired(90)) {
 		$expireClass = ' class="expire90"';
 		}
 	}
 
+// self signed?
+$isSelfSigned = ($cert->FingerprintMD5 == $issuer->FingerprintMD5);
+
 // footer links
 if (!$expired and !$revoked) {
-	if ($data->isRevokable()) {
+	if ($cert->isRevokable()) {
 		$this->addMenuLink($qs_revoke,'Revoke','redoutline');
 		}
-	if ($data->hasPrivateKey()) {
-		if ($data->isEncrypted()) {
+	if ($cert->hasPrivateKey()) {
+		if ($cert->isEncrypted()) {
 			$qs = $this->getActionQs(WA_ACTION_CHANGE_PASS);
 			$this->addMenuLink($qs,'Change Private Key Password','greenoutline');
 			$qs = $this->getActionQs(WA_ACTION_DECRYPT);
@@ -72,27 +75,27 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 	<TR>
 		<TH>Certificate ID</TH>
 		<TD>
-			<?= $data->getProperty('Id') . "\n"; ?>
+			<?= $cert->Id . "\n"; ?>
 		</TD>
 	</TR>
 	<TR>
 		<TH>Person's Name (commonName)</TH>
 		<TD>
-			<?= $data->getProperty('CommonName') . "\n"; ?>
+			<?= $cert->CommonName . "\n"; ?>
 		</TD>
 	</TR>
 <? if ($revoked) { ?>
 	<TR>
 		<TH>Date Revoked</TH>
 		<TD>
-			<?= $data->getProperty('RevokeDate'); ?>
+			<?= $cert->RevokeDate; ?>
 		</TD>
 	</TR>
 <? } else { ?>
 	<TR>
 		<TH>Date Valid</TH>
 		<TD<?= $expireClass; ?>>
-			<?= $data->getProperty('ValidFrom') . ' to ' . $data->getProperty('ValidTo') . "\n"; ?>
+			<?= $cert->ValidFrom . ' to ' . $cert->ValidTo . "\n"; ?>
 		</TD>
 	</TR>
 <? } ?>
@@ -100,22 +103,22 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 	<TR>
 		<TH COLSPAN="2">Contact Information</TH>
 	</TR>
-<? if ($data->getProperty('EmailAddress')) { ?>
+<? if ($cert->EmailAddress) { ?>
 	<TR>
 		<TH>Email Address</TH>
-		<TD><?= $data->getProperty('EmailAddress'); ?></TD>
+		<TD><?= $cert->EmailAddress; ?></TD>
 	</TR>
 <? } ?>
-<? if ($data->getProperty('OrgName')) { ?>
+<? if ($cert->OrgName) { ?>
 	<TR>
 		<TH>Organization</TH>
-		<TD><?= $data->getProperty('OrgName'); ?></TD>
+		<TD><?= $cert->OrgName; ?></TD>
 	</TR>
 <? } ?>
-<? if ($data->getProperty('OrgUnitName')) { ?>
+<? if ($cert->OrgUnitName) { ?>
 	<TR>
 		<TH>Organizational Unit</TH>
-		<TD><?= nl2br($data->getProperty('OrgUnitName')); ?></TD>
+		<TD><?= nl2br($cert->OrgUnitName); ?></TD>
 	</TR>
 <? } ?>
 <? } ?>
@@ -125,28 +128,28 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 	<TR>
 		<TH>MD5</TH>
 		<TD>
-			<?= $data->getProperty('FingerprintMD5') . "\n"; ?>
+			<?= $cert->FingerprintMD5 . "\n"; ?>
 		</TD>
 	</TR>
 	<TR>
 		<TH>SHA1</TH>
 		<TD>
-			<?= $data->getProperty('FingerprintSHA1') . "\n"; ?>
+			<?= $cert->FingerprintSHA1 . "\n"; ?>
 		</TD>
 	</TR>
 	<TR>
 		<TH>Serial Number</TH>
 		<TD>
-			<?= $data->getProperty('SerialNumber') . "\n"; ?>
+			<?= $cert->SerialNumber . "\n"; ?>
 		</TD>
 	</TR>
 	<TR>
 		<TH>Created</TH>
 		<TD>
-			<?= $data->getProperty('CreateDate') . "\n"; ?>
+			<?= $cert->CreateDate . "\n"; ?>
 		</TD>
 	</TR>
-<? if (!$issuer) { ?>
+<? if ($isSelfSigned) { ?>
 	<TR>
 		<TH>Issuer</TH>
 		<TD>
@@ -156,13 +159,13 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 <? } ?>
 </TABLE>
 
-<? if ($issuer) { ?>
+<? if (!$isSelfSigned) { ?>
 <?
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
     . 'Issuer</A>';
-$targ  = '_viewCaCert' . $issuer->getProperty('Id');
-$ca_cn = ($issuer->getProperty('CommonName')) ? $issuer->getProperty('CommonName') : 'not set';
+$targ  = '_viewCaCert' . $issuer->Id;
+$ca_cn = ($issuer->CommonName) ? $issuer->CommonName : 'not set';
 $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
        . $ca_cn . '</A>';
 ?>
@@ -177,33 +180,33 @@ $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
 			<?= $ca_hr; ?>
 		</TD>
 	</TR>
-<? if ($issuer->getProperty('OrgName')) { ?>
+<? if ($issuer->OrgName) { ?>
 	<TR>
 		<TH>
 			Organization
 		</TH>
 		<TD>
-			<?= $issuer->getProperty('OrgName'); ?>
+			<?= $issuer->OrgName; ?>
 		</TD>
 	</TR>
 <? } ?>
-<? if ($issuer->getProperty('OrgUnitName')) { ?>
+<? if ($issuer->OrgUnitName) { ?>
 	<TR>
 		<TH>
 			Organizational Unit
 		</TH>
 		<TD>
-			<?= $issuer->getProperty('OrgUnitName'); ?>
+			<?= $issuer->OrgUnitName; ?>
 		</TD>
 	</TR>
 <? } ?>
-<? if ($issuer->getProperty('ValidFrom') and $issuer->getProperty('ValidTo')) { ?>
+<? if ($issuer->ValidFrom and $issuer->ValidTo) { ?>
 	<TR>
 		<TH>
 			Date Valid
 		</TH>
 		<TD>
-			<?= $issuer->getProperty('ValidFrom'); ?> to <?= $issuer->getProperty('ValidTo'); ?>
+			<?= $issuer->ValidFrom; ?> to <?= $issuer->ValidTo; ?>
 		</TD>
 	</TR>
 <? } ?>
@@ -221,13 +224,13 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 <TABLE ALIGN="center">
 	<TR>
 		<TD>
-			<PRE><?= $data->getProperty('Certificate') . "\n"; ?></PRE>
+			<PRE><?= $cert->Certificate . "\n"; ?></PRE>
 		</TD>
 	</TR>
 </TABLE>
 </DIV>
 <?
-if ($data->hasPrivateKey()) {
+if ($cert->hasPrivateKey()) {
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
     . 'Private Key</A>';
@@ -237,14 +240,14 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 <TABLE ALIGN="center">
 	<TR>
 		<TD>
-			<PRE><?= $data->getProperty('PrivateKey'); ?></PRE>
+			<PRE><?= $cert->PrivateKey; ?></PRE>
 		</TD>
 	</TR>
 </TABLE>
 </DIV>
 <? } ?>
 <?
-if ($data->hasPublicKey()) {
+if ($cert->hasPublicKey()) {
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
     . 'Public Key</A>';
@@ -254,13 +257,13 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 <TABLE ALIGN="center">
 	<TR>
 		<TD>
-			<PRE><?= $data->getProperty('PublicKey') . "\n"; ?></PRE>
+			<PRE><?= $cert->PublicKey . "\n"; ?></PRE>
 		</TD>
 	</TR>
 </TABLE>
 </DIV>
 <? } ?>
-<? if ($data->hasCsr()) { ?>
+<? if ($cert->hasCsr()) { ?>
 <?
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
@@ -271,11 +274,10 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 <TABLE ALIGN="center">
 	<TR>
 		<TD>
-			<PRE><?= $data->getProperty('CSR') . "\n"; ?></PRE>
+			<PRE><?= $cert->CSR . "\n"; ?></PRE>
 		</TD>
 	</TR>
 </TABLE>
 </DIV>
 <? } ?>
-
 <?= $this->getPageFooter(); ?>

@@ -1917,54 +1917,73 @@ public function getPageCaRevoke() {
 		$this->html->errorMsgSet('Failed to locate the specified certificate.');
 		die($this->getPageCaView());
 		}
+	$cert = new phpmycaCert($this->ca);
 	// Is it already revoked?
-	if ($this->ca->isRevoked()) {
+	if ($cert->isRevoked()) {
 		$this->html->errorMsgSet('The certificate is already revoked.');
 		die($this->getPageCaView());
 		}
 	// Is it already expired?
-	if ($this->ca->isExpired()) {
+	if ($cert->isExpired()) {
 		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
 		die($this->getPageCaView());
 		}
 	// Can it be revoked?
-	if (!$this->ca->isRevokable()) {
+	if (!$cert->isRevokable()) {
 		$m = 'Certificate cannot be revoked.  Either the private key is missing'
 		. ' or it has already been revoked.';
 		$this->html->errorMsgSet($m);
 		die($this->getPageCaView());
 		}
+	$this->html->setVar('cert', &$cert);
+
 	// Get list of other ca certs this ca has signed.
-	$caCerts = $this->ca->getIssuerSubjects($id);
-	if (!is_array($caCerts)) {
+	$certs = $this->ca->getIssuerSubjects($id);
+	if (!is_array($certs)) {
 		$msg = 'Failed to query CA certs signed by this CA, will not '
 		     . 'continue.';
 		$this->html->errorMsgSet($msg);
 		die($this->getPageCaView());
 		}
+	// convert the ca certs
+	$caCerts = array();
+	foreach($certs as &$ar) {
+		$caCerts[] = new phpmycaCert($ar,'ca','user',false);
+		}
+	$this->html->setVar('caCerts', &$caCerts);
 
-	$this->html->setVar('caCerts',&$caCerts);
 	// Get list of client certs this ca has signed
-	$clientCerts = $this->client->getIssuerSubjects($id);
-	if (!is_array($clientCerts)) {
+	$certs = $this->client->getIssuerSubjects($id);
+	if (!is_array($certs)) {
 		$msg = 'Failed to query client certs signed by this CA, will not '
 		     . 'continue.';
 		$this->html->errorMsgSet($msg);
 		die($this->getPageCaView());
 		}
-	$this->html->setVar('clientCerts',&$clientCerts);
+	// convert the client certs
+	$clientCerts = array();
+	foreach($certs as &$ar) {
+		$clientCerts[] = new phpmycaCert($ar,'client','user',false);
+		}
+	$this->html->setVar('clientCerts', &$clientCerts);
+
 	// Get list of server certs this ca has signed
-	$serverCerts = $this->server->getIssuerSubjects($id);
-	if (!is_array($serverCerts)) {
+	$certs = $this->server->getIssuerSubjects($id);
+	if (!is_array($certs)) {
 		$msg = 'Failed to query server certs signed by this CA, will not '
 		     . 'continue.';
 		$this->html->errorMsgSet($msg);
 		die($this->getPageCaView());
 		}
-	$this->html->setVar('serverCerts',&$serverCerts);
+	// convert the server certs
+	$serverCerts = array();
+	foreach($certs as &$ar) {
+		$serverCerts[] = new phpmycaCert($ar,'server','user',false);
+		}
+	$this->html->setVar('serverCerts', &$serverCerts);
+
 	// Have they confirmed?
 	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
-		$this->html->setVar('data',&$this->ca);
 		die($this->html->loadTemplate('ca.revoke.confirm.php'));
 		}
 	// Get on wit it
@@ -1988,55 +2007,88 @@ public function getPageCaView() {
 		die($this->html->loadTemplate('ca.view.php'));
 		}
 	$this->moduleRequired('ca,server,client');
+	// populate ca cert
 	$this->ca->resetProperties();
 	if ($this->ca->populateFromDb($id) === false) {
 		$this->html->errorMsgSet('Failed to locate the specified certificate.');
 		die($this->html->loadTemplate('ca.view.php'));
 		}
-	// locate the issuer if this is not self signed.
-	$pid = $this->ca->getProperty('ParentId');
-	$issuer = false;
-	if ($pid > 0) {
-		$issuer = new $this->classCa();
-		$issuer->setDatabaseHost(WEBAPP_DB_HOST);
-		$issuer->setDatabase(WEBAPP_DB_NAME);
-		$issuer->setDatabaseUser(WEBAPP_DB_USER);
-		$issuer->setDatabasePass(WEBAPP_DB_PASS);
-		$issuer->resetProperties();
-		if ($issuer->populateFromDb($pid) === false) {
-			$this->html->errorMsgSet('Failed to locate issuer information.');
+	$cert = new phpmycaCert($this->ca);
+	// populate issuer cert
+	if ($cert->ParentId == 0) {
+		// self signed
+		$issuer =& $cert;
+		} else {
+		$this->ca->resetProperties();
+		if ($this->ca->populateFromDb($cert->ParentId) === false) {
+			$this->html->errorMsgSet('Failed to locate the issuer certificate.');
 			die($this->html->loadTemplate('ca.view.php'));
 			}
+		$issuer = new phpmycaCert($this->ca);
 		}
 	// query all of the ca certs this ca has signed...
 	$this->ca->searchReset();
 	$this->ca->setSearchSelect('Id');
 	$this->ca->setSearchSelect('CommonName');
 	$this->ca->setSearchSelect('ValidTo');
+	$this->ca->setSearchSelect('RevokeDate');
 	$this->ca->setSearchOrder('CommonName');
-	$this->ca->setSearchFilter('ParentId',$id);
-	$signedCaCerts = $this->ca->query();
+	$this->ca->setSearchFilter('ParentId',$cert->Id);
+	$certs = $this->ca->query();
+	if (!is_array($certs)) {
+		$m = 'Failure locating intermediate certs signed by the issuer.';
+		$this->html->errorMsgSet($m);
+		die($this->html->loadTemplate('ca.view.php'));
+		}
+	// convert the ca certs
+	$signedCaCerts = array();
+	foreach($certs as &$ar) {
+		$signedCaCerts[] = new phpmycaCert($ar,'ca','user',false);
+		}
 	// query all of the client certs this ca has signed...
 	$this->client->searchReset();
 	$this->client->setSearchSelect('Id');
 	$this->client->setSearchSelect('CommonName');
 	$this->client->setSearchSelect('ValidTo');
+	$this->client->setSearchSelect('RevokeDate');
 	$this->client->setSearchOrder('CommonName');
 	$this->client->setSearchFilter('ParentId',$id);
-	$signedClientCerts = $this->client->query();
+	$certs = $this->client->query();
+	if (!is_array($certs)) {
+		$m = 'Failure locating client certs signed by the issuer.';
+		$this->html->errorMsgSet($m);
+		die($this->html->loadTemplate('ca.view.php'));
+		}
+	// convert the client certs
+	$signedClientCerts = array();
+	foreach($certs as &$ar) {
+		$signedClientCerts[] = new phpmycaCert($ar,'client','user',false);
+		}
 	// query all of the server certs this ca has signed...
 	$this->server->searchReset();
 	$this->server->setSearchSelect('Id');
 	$this->server->setSearchSelect('CommonName');
 	$this->server->setSearchSelect('ValidTo');
+	$this->server->setSearchSelect('RevokeDate');
 	$this->server->setSearchOrder('CommonName');
 	$this->server->setSearchFilter('ParentId',$id);
-	$signedServerCerts = $this->server->query();
-	$this->html->setVar('data',&$this->ca);
-	$this->html->setVar('issuer',&$issuer);
-	$this->html->setVar('signedCaCerts',&$signedCaCerts);
-	$this->html->setVar('signedClientCerts',&$signedClientCerts);
-	$this->html->setVar('signedServerCerts',&$signedServerCerts);
+	$certs = $this->server->query();
+	if (!is_array($certs)) {
+		$m = 'Failure locating server certs signed by the issuer.';
+		$this->html->errorMsgSet($m);
+		die($this->html->loadTemplate('ca.view.php'));
+		}
+	// convert the server certs
+	$signedServerCerts = array();
+	foreach($certs as &$ar) {
+		$signedServerCerts[] = new phpmycaCert($ar,'server','user',false);
+		}
+	// populate the template variables
+	$this->html->setVar('cert',              &$cert);
+	$this->html->setVar('issuer',            &$issuer);
+	$this->html->setVar('signedCaCerts',     &$signedCaCerts);
+	$this->html->setVar('signedClientCerts', &$signedClientCerts);
+	$this->html->setVar('signedServerCerts', &$signedServerCerts);
 	die($this->html->loadTemplate('ca.view.php'));
 	}
 
@@ -2143,18 +2195,21 @@ public function getPageClientRevoke() {
 		$this->html->errorMsgSet('Failed to locate the specified certificate.');
 		die($this->getPageClientView());
 		}
+	$cert = new phpmycaCert($this->client);
+	$this->html->setVar('cert', &$cert);
+
 	// Is it already revoked?
-	if ($this->client->isRevoked()) {
+	if ($cert->isRevoked()) {
 		$this->html->errorMsgSet('The certificate is already revoked.');
 		die($this->getPageClientView());
 		}
 	// Is it already expired?
-	if ($this->client->isExpired()) {
+	if ($cert->isExpired()) {
 		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
 		die($this->getPageClientView());
 		}
 	// Can it be revoked?
-	if (!$this->client->isRevokable()) {
+	if (!$cert->isRevokable()) {
 		$m = 'Certificate cannot be revoked.  Either the private key is missing'
 		. ' or it has already been revoked.';
 		$this->html->errorMsgSet($m);
@@ -2162,7 +2217,6 @@ public function getPageClientRevoke() {
 		}
 	// Have they confirmed?
 	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
-		$this->html->setVar('data',&$this->client);
 		die($this->html->loadTemplate('client.revoke.confirm.php'));
 		}
 	// Get on wit it
@@ -2199,8 +2253,8 @@ public function getPageClientView() {
 		$this->html->errorMsgSet('Failed to locate issuer information.');
 		die($this->html->loadTemplate('client.view.php'));
 		}
-	$this->html->setVar('data',&$this->client);
-	$this->html->setVar('issuer',&$this->ca);
+	$this->html->setVar('cert',   new phpmycaCert($this->client));
+	$this->html->setVar('issuer', new phpmycaCert($this->ca));
 	die($this->html->loadTemplate('client.view.php'));
 	}
 
@@ -2370,18 +2424,21 @@ public function getPageServerRevoke() {
 		$this->html->errorMsgSet('Failed to locate the specified certificate.');
 		die($this->getPageServerView());
 		}
+	$cert = new phpmycaCert($this->server);
+	$this->html->setVar('cert', &$cert);
+
 	// Is it already revoked?
-	if ($this->server->isRevoked()) {
+	if ($cert->isRevoked()) {
 		$this->html->errorMsgSet('The certificate is already revoked.');
 		die($this->getPageServerView());
 		}
 	// Is it already expired?
-	if ($this->server->isExpired()) {
+	if ($cert->isExpired()) {
 		$this->html->errorMsgSet('Certificate is expired, will not revoke.');
 		die($this->getPageServerView());
 		}
 	// Can it be revoked?
-	if (!$this->server->isRevokable()) {
+	if (!$cert->isRevokable()) {
 		$m = 'Certificate cannot be revoked.  Either the private key is missing'
 		. ' or it has already been revoked.';
 		$this->html->errorMsgSet($m);
@@ -2389,7 +2446,6 @@ public function getPageServerRevoke() {
 		}
 	// Have they confirmed?
 	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
-		$this->html->setVar('data',&$this->server);
 		die($this->html->loadTemplate('server.revoke.confirm.php'));
 		}
 	// Get on wit it
@@ -2424,10 +2480,8 @@ public function getPageServerView() {
 		$this->html->errorMsgSet('Failed to locate issuer information.');
 		die($this->html->loadTemplate('server.view.php'));
 		}
-$this->html->setVar('server',new phpmycaCert($this->server));
-
-	$this->html->setVar('data',&$this->server);
-	$this->html->setVar('issuer',&$this->ca);
+	$this->html->setVar('cert',   new phpmycaCert($this->server));
+	$this->html->setVar('issuer', new phpmycaCert($this->ca));
 	die($this->html->loadTemplate('server.view.php'));
 	}
 
