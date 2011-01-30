@@ -159,8 +159,7 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 <? } ?>
 </TABLE>
 
-<? if (!$isSelfSigned) { ?>
-<?
+<? if (!$isSelfSigned) {
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
     . 'Issuer</A>';
@@ -168,6 +167,22 @@ $targ  = '_viewCaCert' . $issuer->Id;
 $ca_cn = ($issuer->CommonName) ? $issuer->CommonName : 'not set';
 $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
        . $ca_cn . '</A>';
+// expired or revoked?
+$class = 'certData';
+$expired = $issuer->isExpired();
+$revoked = $issuer->isRevoked();
+if ($expired) { $class .= ' expired'; }
+if ($revoked) { $class .= ' revoked'; }
+// expiring soon?
+if (!$expired and !$revoked) {
+	if ($issuer->isExpired(30)) {
+		$issuer .= ' expire30';
+		} elseif ($cert->isExpired(60)) {
+		$issuer .= ' expire60';
+		} elseif ($cert->isExpired(90)) {
+		$issuer .= ' expire90';
+		}
+	}
 ?>
 <DIV ID="dataCategory"><?= $hr; ?></DIV>
 <DIV ID="<?= $id; ?>" STYLE="display: none">
@@ -176,7 +191,7 @@ $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
 		<TH>
 			commonName
 		</TH>
-		<TD>
+		<TD CLASS="<?= $class; ?>">
 			<?= $ca_hr; ?>
 		</TD>
 	</TR>
@@ -185,7 +200,7 @@ $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
 		<TH>
 			Organization
 		</TH>
-		<TD>
+		<TD CLASS="<?= $class; ?>">
 			<?= $issuer->OrgName; ?>
 		</TD>
 	</TR>
@@ -195,25 +210,36 @@ $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
 		<TH>
 			Organizational Unit
 		</TH>
-		<TD>
+		<TD CLASS="<?= $class; ?>">
 			<?= $issuer->OrgUnitName; ?>
 		</TD>
 	</TR>
 <? } ?>
-<? if ($issuer->ValidFrom and $issuer->ValidTo) { ?>
+<? if ($revoked) { ?>
+	<TR>
+		<TH>
+			Date Revoked
+		</TH>
+		<TD CLASS="<?= $class; ?>">
+			<?= $issuer->RevokeDate; ?>
+		</TD>
+	</TR>
+<? } else {
+if ($issuer->ValidFrom and $issuer->ValidTo) { ?>
 	<TR>
 		<TH>
 			Date Valid
 		</TH>
-		<TD>
+		<TD CLASS="<?= $class; ?>">
 			<?= $issuer->ValidFrom; ?> to <?= $issuer->ValidTo; ?>
 		</TD>
 	</TR>
-<? } ?>
+<? }
+}
+?>
 </TABLE>
 </DIV>
 <? } ?>
-
 <?
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'

@@ -193,9 +193,7 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 	</TR>
 <? } ?>
 </TABLE>
-
-<? if (!$isSelfSigned) { ?>
-<?
+<? if (!$isSelfSigned) {
 $id  = 'tog_' . $this->getNumber();
 $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
     . 'Issuer</A>';
@@ -203,6 +201,22 @@ $targ  = '_viewCaCert' . $issuer->Id;
 $ca_cn = ($issuer->CommonName) ? $issuer->CommonName : 'not set';
 $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
        . $ca_cn . '</A>';
+// expired or revoked?
+$class = 'certData';
+$expired = $issuer->isExpired();
+$revoked = $issuer->isRevoked();
+if ($expired) { $class .= ' expired'; }
+if ($revoked) { $class .= ' revoked'; }
+// expiring soon?
+if (!$expired and !$revoked) {
+	if ($issuer->isExpired(30)) {
+		$issuer .= ' expire30';
+		} elseif ($cert->isExpired(60)) {
+		$issuer .= ' expire60';
+		} elseif ($cert->isExpired(90)) {
+		$issuer .= ' expire90';
+		}
+	}
 ?>
 <DIV ID="dataCategory"><?= $hr; ?></DIV>
 <DIV ID="<?= $id; ?>" STYLE="display: none">
@@ -211,7 +225,7 @@ $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
 		<TH>
 			commonName
 		</TH>
-		<TD>
+		<TD CLASS="<?= $class; ?>">
 			<?= $ca_hr; ?>
 		</TD>
 	</TR>
@@ -220,7 +234,7 @@ $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
 		<TH>
 			Organization
 		</TH>
-		<TD>
+		<TD CLASS="<?= $class; ?>">
 			<?= $issuer->OrgName; ?>
 		</TD>
 	</TR>
@@ -230,12 +244,22 @@ $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
 		<TH>
 			Organizational Unit
 		</TH>
-		<TD>
+		<TD CLASS="<?= $class; ?>">
 			<?= $issuer->OrgUnitName; ?>
 		</TD>
 	</TR>
 <? } ?>
-<? if ($issuer->ValidFrom and $issuer->ValidTo) { ?>
+<? if ($revoked) { ?>
+	<TR>
+		<TH>
+			Date Revoked
+		</TH>
+		<TD CLASS="<?= $class; ?>">
+			<?= $issuer->RevokeDate; ?>
+		</TD>
+	</TR>
+<? } else {
+if ($issuer->ValidFrom and $issuer->ValidTo) { ?>
 	<TR>
 		<TH>
 			Date Valid
@@ -244,7 +268,9 @@ $ca_hr = '<A TARGET="' . $targ . '" HREF="' . $qs_issuer . '">'
 			<?= $issuer->ValidFrom; ?> to <?= $issuer->ValidTo; ?>
 		</TD>
 	</TR>
-<? } ?>
+<? }
+}
+?>
 </TABLE>
 </DIV>
 <? } ?>
@@ -262,15 +288,31 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 		<TH>validTo</TH>
 	</TR>
 <? foreach($signedCaCerts as &$c) {
-	$qs   = $qs_ca_cert . $c->Id;
-	$targ = '_viewCert' . $c->Id;
-	$txt  = (strlen($c->CommonName) > 0) ? $c->CommonName : 'not set';
-	$hr   = '<A TARGET="' . $targ . '" HREF="' . $qs . '">'
-	      . $txt . '</A>';
+	$class = 'certData';
+	$qs    = $qs_ca_cert . $c->Id;
+	$targ  = '_viewCert' . $c->Id;
+	$txt   = (strlen($c->CommonName) > 0) ? $c->CommonName : 'not set';
+	$hr    = '<A TARGET="' . $targ . '" HREF="' . $qs . '">'
+	       . $txt . '</A>';
+	$expired = $c->isExpired();
+	$revoked = $c->isRevoked();
+	if ($expired) { $class .= ' expired'; }
+	if ($revoked) { $class .= ' revoked'; }
+	// expiring soon?
+	if (!$revoked and !$expired) {
+		if ($c->isExpired(30)) {
+			$class .= ' expire30';
+			} elseif ($c->isExpired(60)) {
+			$class .= ' expire60';
+			} elseif ($c->isExpired(90)) {
+			$class .= ' expire90';
+			}
+		}
+	$validTo = ($revoked) ? $c->RevokeDate : $c->ValidTo;
 	?>
 	<TR>
-		<TD><?= $hr; ?></TD>
-		<TD><?= $c->ValidTo; ?></TD>
+		<TD CLASS="<?= $class; ?>"><?= $hr; ?></TD>
+		<TD CLASS="<?= $class; ?>"><?= $validTo; ?></TD>
 	</TR>
 <? } ?>
 </TABLE>
@@ -290,14 +332,30 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 		<TH>validTo</TH>
 	</TR>
 <? foreach($signedClientCerts as &$c) {
-	$qs   = $qs_client_cert . $c->Id;
-	$targ = '_viewCert' . $c->Id;
-	$hr   = '<A TARGET="' . $targ . '" HREF="' . $qs . '">'
-	      . $c->CommonName . '</A>';
-	?>
+	$class = 'certData';
+	$qs    = $qs_client_cert . $c->Id;
+	$targ  = '_viewCert' . $c->Id;
+	$hr    = '<A TARGET="' . $targ . '" HREF="' . $qs . '">'
+	       . $c->CommonName . '</A>';
+	$expired = $c->isExpired();
+	$revoked = $c->isRevoked();
+	if ($expired) { $class .= ' expired'; }
+	if ($revoked) { $class .= ' revoked'; }
+	// expiring soon?
+	if (!$revoked and !$expired) {
+		if ($c->isExpired(30)) {
+			$class .= ' expire30';
+			} elseif ($c->isExpired(60)) {
+			$class .= ' expire60';
+			} elseif ($c->isExpired(90)) {
+			$class .= ' expire90';
+			}
+		}
+	$validTo = ($revoked) ? $c->RevokeDate : $c->ValidTo;
+?>
 	<TR>
-		<TD><?= $hr; ?></TD>
-		<TD><?= $c->ValidTo; ?></TD>
+		<TD CLASS="<?= $class; ?>"><?= $hr; ?></TD>
+		<TD CLASS="<?= $class; ?>"><?= $validTo; ?></TD>
 	</TR>
 <? } ?>
 </TABLE>
@@ -317,14 +375,30 @@ $hr = '<A HREF="javascript:void(0)" ONCLICK="toggleDisplay(\'' . $id . '\')">'
 		<TH>validTo</TH>
 	</TR>
 <? foreach($signedServerCerts as &$c) {
-	$qs   = $qs_server_cert . $c->Id;
-	$targ = '_viewCert' . $c->Id;
-	$hr   = '<A TARGET="' . $targ . '" HREF="' . $qs . '">'
-	      . $c->CommonName . '</A>';
-	?>
+	$class = 'certData';
+	$qs    = $qs_server_cert . $c->Id;
+	$targ  = '_viewCert' . $c->Id;
+	$hr    = '<A TARGET="' . $targ . '" HREF="' . $qs . '">'
+	       . $c->CommonName . '</A>';
+	$expired = $c->isExpired();
+	$revoked = $c->isRevoked();
+	if ($expired) { $class .= ' expired'; }
+	if ($revoked) { $class .= ' revoked'; }
+	// expiring soon?
+	if (!$revoked and !$expired) {
+		if ($c->isExpired(30)) {
+			$class .= ' expire30';
+			} elseif ($c->isExpired(60)) {
+			$class .= ' expire60';
+			} elseif ($c->isExpired(90)) {
+			$class .= ' expire90';
+			}
+		}
+	$validTo = ($revoked) ? $c->RevokeDate : $c->ValidTo;
+?>
 	<TR>
-		<TD><?= $hr; ?></TD>
-		<TD><?= $c->ValidTo; ?></TD>
+		<TD CLASS="<?= $class; ?>"><?= $hr; ?></TD>
+		<TD CLASS="<?= $class; ?>"><?= $validTo; ?></TD>
 	</TR>
 <? } ?>
 </TABLE>
