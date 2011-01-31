@@ -19,12 +19,6 @@ if (!($issuer instanceof phpmycaCert)) {
 	die($this->getPageError($m));
 	}
 
-$hasContact = (!empty($cert->CountryName) or
-               !empty($cert->EmailAddress) or
-               !empty($cert->LocalityName) or
-               !empty($cert->OrgName) or
-               !empty($cert->OrgUnitName) or
-               !empty($cert->StateName));
 $qs_back     = $this->getActionQs(WA_ACTION_SERVER_LIST);
 $qs_issuer   = $this->getMenuQs(MENU_CERTS_CA)
              . '&' . WA_QS_ACTION . '=' . WA_ACTION_CA_VIEW
@@ -109,7 +103,6 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 		</TD>
 	</TR>
 <? } ?>
-<? if ($hasContact) { ?>
 	<TR>
 		<TH COLSPAN="2">Contact Information</TH>
 	</TR>
@@ -148,7 +141,6 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 		<TH>Country</TH>
 		<TD><?= $cert->CountryName; ?></TD>
 	</TR>
-<? } ?>
 <? } ?>
 	<TR>
 		<TH COLSPAN="2">Fingerprints</TH>

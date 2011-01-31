@@ -20,9 +20,6 @@ if (!($issuer instanceof phpmycaCert)) {
 	die($this->getPageError($m));
 	}
 
-$hasContact = (!empty($cert->EmailAddress) or
-               !empty($cert->OrgName) or
-               !empty($cert->OrgUnitName));
 $qs_back     = $this->getActionQs(WA_ACTION_CLIENT_LIST);
 $qs_pkcs12   = $this->getActionQs(WA_ACTION_CLIENT_PKCS12);
 $qs_issuer   = $this->getMenuQs(MENU_CERTS_CA)
@@ -99,7 +96,6 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 		</TD>
 	</TR>
 <? } ?>
-<? if ($hasContact) { ?>
 	<TR>
 		<TH COLSPAN="2">Contact Information</TH>
 	</TR>
@@ -120,7 +116,6 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 		<TH>Organizational Unit</TH>
 		<TD><?= nl2br($cert->OrgUnitName); ?></TD>
 	</TR>
-<? } ?>
 <? } ?>
 	<TR>
 		<TH COLSPAN="2">Fingerprints</TH>

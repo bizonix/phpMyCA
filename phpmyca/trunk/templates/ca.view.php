@@ -20,11 +20,6 @@ if (!($issuer instanceof phpmycaCert)) {
 $signedCaCerts     =& $this->getVar('signedCaCerts');
 $signedClientCerts =& $this->getVar('signedClientCerts');
 $signedServerCerts =& $this->getVar('signedServerCerts');
-$hasContact    = ($cert->CommonName or
-                  $cert->LocalityName or
-                  $cert->OrgName or
-                  $cert->OrgUnitName or
-                  $cert->CountryName);
 $qs_back        = $this->getActionQs(WA_ACTION_CA_LIST);
 $qs_pkcs12      = $this->getActionQs(WA_ACTION_CA_PKCS12);
 $qs_issuer      = $this->getMenuQs(MENU_CERTS_CA)
@@ -116,7 +111,6 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 		</TD>
 	</TR>
 <? } ?>
-<? if ($hasContact) { ?>
 	<TR>
 		<TH COLSPAN="2">Contact Information</TH>
 	</TR>
@@ -149,7 +143,6 @@ $this->addMenuLink($qs_back,'Back','greenoutline');
 		<TH>Country</TH>
 		<TD><?= $cert->CountryName; ?></TD>
 	</TR>
-<? } ?>
 <? } ?>
 	<TR>
 		<TH COLSPAN="2">Fingerprints</TH>
