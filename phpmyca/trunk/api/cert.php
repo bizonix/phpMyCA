@@ -215,6 +215,19 @@ public function populate(&$cert=null, $type=null, $source=null, $validate=true) 
 	}
 
 /**
+ * Validate password of private key of currently populated cert.
+ * @param string $pass
+ * @return bool
+ */
+public function validatePassphrase($pass=null) {
+	if (!$this->isEncrypted()) { return false; }
+	$key = openssl_pkey_get_private($this->PrivateKey,$pass);
+	if ($key === false) { return false; }
+	unset($key);
+	return true;
+	}
+
+/**
  * Get array of required property names when populating certificate by type.
  * @param string $type ca | client | server
  * @return mixed array on success, false on invalid type

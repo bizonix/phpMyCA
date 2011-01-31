@@ -33,20 +33,33 @@ $this->addMenuLink('javascript:document.revokecert.submit();','Revoke','greenout
 <?= $this->getFormHeader('revokecert'); ?>
 <?= $this->getFormBreadCrumb(); ?>
 <INPUT TYPE="hidden" NAME="<? echo WA_QS_CONFIRM; ?>" VALUE="yes">
+<? if ($cert->isEncrypted()) { ?>
+<TABLE ALIGN="center" WIDTH="100%">
+<? $val = (isset($_POST['caPassPhrase'])) ? $_POST['caPassPhrase'] : ''; ?>
+	<TR>
+		<TH>Issuer Passphrase</TH>
+		<TD>
+			<INPUT TYPE="password" NAME="caPassPhrase" VALUE="<?= $val; ?>" SIZE="40" MAXLENGTH="64">
+		</TD>
+	</TR>
+</TABLE>
+<? } ?>
 <P>
 Are you absolutely certain you want to revoke the certificate for <?= $cert->CommonName; ?>?
 This process is not reversible.
 </P>
 <? if ($hasSubjects) { ?>
 <P>
-The following certificates have been issued by this CA and will no longer be
-considered verified clients who are able to determine this CA certificate has
-been revoked.
+The following certificates have been signed by this CA or its intermediate
+certificates.  As a result the certificates listed below will no longer be
+considered trustworthy by properly configured clients.
 </P>
+<? } ?>
+
 <? if ($hasCaCerts) { ?>
 <TABLE ALIGN="center" WIDTH="100%">
 	<TR>
-		<TH COLSPAN="3">CA Certificates Signed by this CA</TH>
+		<TH COLSPAN="3">CA Certificates Signed by this CA or Intermediates</TH>
 	</TR>
 	<TR>
 		<TH>Name</TH>
@@ -73,7 +86,7 @@ been revoked.
 <? if ($hasServerCerts) { ?>
 <TABLE ALIGN="center" WIDTH="100%">
 	<TR>
-		<TH COLSPAN="3">Server Certificates Signed by this CA</TH>
+		<TH COLSPAN="3">Server Certificates Signed by this CA or Intermediates</TH>
 	</TR>
 	<TR>
 		<TH>Name</TH>
@@ -100,7 +113,7 @@ been revoked.
 <? if ($hasClientCerts) { ?>
 <TABLE ALIGN="center" WIDTH="100%">
 	<TR>
-		<TH COLSPAN="3">Client Certificates Signed by this CA</TH>
+		<TH COLSPAN="3">Client Certificates Signed by this CA or Intermediates</TH>
 	</TR>
 	<TR>
 		<TH>Name</TH>
@@ -122,7 +135,6 @@ been revoked.
 	</TR>
 <? } ?>
 </TABLE>
-<? } ?>
 <? } ?>
 <?= $this->getFormFooter(); ?>
 <?= $this->getPageFooter(); ?>

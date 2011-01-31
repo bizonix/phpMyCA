@@ -1937,23 +1937,45 @@ public function getPageCaRevoke() {
 		}
 	$this->html->setVar('cert', &$cert);
 
-	// Get list of other ca certs this ca has signed.
-	$certs = $this->ca->getIssuerSubjects($id);
-	if (!is_array($certs)) {
+	// Construct a recursive array that contains all of child certs that will
+	// be affected.  Starting with all ca (issuer) certificates.
+	$idTree = $this->ca->getCaFamilyTree($id);
+	if (!is_array($idTree)) {
 		$msg = 'Failed to query CA certs signed by this CA, will not '
 		     . 'continue.';
 		$this->html->errorMsgSet($msg);
 		die($this->getPageCaView());
 		}
-	// convert the ca certs
+	$caIds = $this->ca->getCaFamilyTreeIds($idTree);
+	if (!is_array($caIds)) {
+		$msg = 'Failed to query intermediate CA cert ids signed by this CA, '
+		     . 'will not continue.';
+		$this->html->errorMsgSet($msg);
+		die($this->getPageCaView());
+		}
+	// Construct array of ca certificate phpmycaCert objects that will be
+	// affected by the revoke.
 	$caCerts = array();
-	foreach($certs as &$ar) {
-		$caCerts[] = new phpmycaCert($ar,'ca','user',false);
+	foreach($caIds as $caid) {
+		$this->ca->resetProperties();
+		if ($this->ca->populateFromDb($caid) === false) {
+			$m = 'Failed to query CA certificate ID ' . $caid;
+			$this->html->errorMsgSet($m);
+			die($this->getPageCaView());
+			}
+		$caCerts[] = new phpmycaCert($this->ca);
 		}
 	$this->html->setVar('caCerts', &$caCerts);
 
-	// Get list of client certs this ca has signed
-	$certs = $this->client->getIssuerSubjects($id);
+	// Get list of client certs the affected issuer certs have signed.
+	// Don't forget to add our current id to the ca ids ;)
+	$caIds[] = $id;
+	$this->client->searchReset();
+	foreach($this->client->getPropertyList() as $prop) {
+		$this->client->setSearchSelect($prop);
+		}
+	$this->client->setSearchFilter('ParentId',$caIds,'in');
+	$certs = $this->client->query();
 	if (!is_array($certs)) {
 		$msg = 'Failed to query client certs signed by this CA, will not '
 		     . 'continue.';
@@ -1968,7 +1990,12 @@ public function getPageCaRevoke() {
 	$this->html->setVar('clientCerts', &$clientCerts);
 
 	// Get list of server certs this ca has signed
-	$certs = $this->server->getIssuerSubjects($id);
+	$this->server->searchReset();
+	foreach($this->server->getPropertyList() as $prop) {
+		$this->server->setSearchSelect($prop);
+		}
+	$this->server->setSearchFilter('ParentId',$caIds,'in');
+	$certs = $this->server->query();
 	if (!is_array($certs)) {
 		$msg = 'Failed to query server certs signed by this CA, will not '
 		     . 'continue.';
@@ -1986,6 +2013,20 @@ public function getPageCaRevoke() {
 	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
 		die($this->html->loadTemplate('ca.revoke.confirm.php'));
 		}
+
+	// If encrypted, did the user enter the private key passphrase?
+	if ($cert->isEncrypted()) {
+		$m = 'Certificate cannot be revoked, pass phrase not specified or '
+		. 'invalid.';
+		$pass = (isset($_POST['caPassPhrase']))
+		? stripslashes(trim($_POST['caPassPhrase'])) : false;
+		$rc = $cert->validatePassphrase($pass);
+		if (!($rc === true)) {
+			$this->html->errorMsgSet($m);
+			die($this->html->loadTemplate('ca.revoke.confirm.php'));
+			}
+		}
+
 	// Get on wit it
 	$this->ca->setProperty('RevokeDate','now()');
 	$rc = $this->ca->update();
@@ -2189,7 +2230,7 @@ public function getPageClientRevoke() {
 		$this->html->errorMsgSet('Must specify valid certificate id.');
 		die($this->getPageClientView());
 		}
-	$this->moduleRequired('client');
+	$this->moduleRequired('ca,client');
 	$this->client->resetProperties();
 	if ($this->client->populateFromDb($id) === false) {
 		$this->html->errorMsgSet('Failed to locate the specified certificate.');
@@ -2215,10 +2256,34 @@ public function getPageClientRevoke() {
 		$this->html->errorMsgSet($m);
 		die($this->getPageClientView());
 		}
+
+	// Look up the issuer
+	$this->ca->resetProperties();
+	if ($this->ca->populateFromDb($cert->ParentId) === false) {
+		$this->html->errorMsgSet('Failed to locate issuer certificate.');
+		die($this->getPageClientView());
+		}
+	$issuer = new phpmycaCert($this->ca);
+	$this->html->setVar('issuer', &$issuer);
+
 	// Have they confirmed?
 	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
 		die($this->html->loadTemplate('client.revoke.confirm.php'));
 		}
+
+	// If encrypted, did the user enter the issuer private key passphrase?
+	if ($issuer->isEncrypted()) {
+		$m = 'Certificate cannot be revoked, issuer pass phrase not specified '
+		   . 'or invalid.';
+		$pass = (isset($_POST['caPassPhrase']))
+		? stripslashes(trim($_POST['caPassPhrase'])) : false;
+		$rc = $issuer->validatePassphrase($pass);
+		if (!($rc === true)) {
+			$this->html->errorMsgSet($m);
+			die($this->html->loadTemplate('client.revoke.confirm.php'));
+			}
+		}
+
 	// Get on wit it
 	$this->client->setProperty('RevokeDate','now()');
 	$rc = $this->client->update();
@@ -2418,7 +2483,7 @@ public function getPageServerRevoke() {
 		$this->html->errorMsgSet('Must specify valid certificate id.');
 		die($this->getPageServerView());
 		}
-	$this->moduleRequired('server');
+	$this->moduleRequired('ca,server');
 	$this->server->resetProperties();
 	if ($this->server->populateFromDb($id) === false) {
 		$this->html->errorMsgSet('Failed to locate the specified certificate.');
@@ -2444,10 +2509,34 @@ public function getPageServerRevoke() {
 		$this->html->errorMsgSet($m);
 		die($this->getPageServerView());
 		}
+
+	// Look up the issuer
+	$this->ca->resetProperties();
+	if ($this->ca->populateFromDb($cert->ParentId) === false) {
+		$this->html->errorMsgSet('Failed to locate issuer certificate.');
+		die($this->getPageClientView());
+		}
+	$issuer = new phpmycaCert($this->ca);
+	$this->html->setVar('issuer', &$issuer);
+
 	// Have they confirmed?
 	if ($this->html->getRequestVar(WA_QS_CONFIRM) !== 'yes') {
 		die($this->html->loadTemplate('server.revoke.confirm.php'));
 		}
+
+	// If encrypted, did the user enter the issuer private key passphrase?
+	if ($issuer->isEncrypted()) {
+		$m = 'Certificate cannot be revoked, issuer pass phrase not specified '
+		   . 'or invalid.';
+		$pass = (isset($_POST['caPassPhrase']))
+		? stripslashes(trim($_POST['caPassPhrase'])) : false;
+		$rc = $issuer->validatePassphrase($pass);
+		if (!($rc === true)) {
+			$this->html->errorMsgSet($m);
+			die($this->html->loadTemplate('server.revoke.confirm.php'));
+			}
+		}
+
 	// Get on wit it
 	$this->server->setProperty('RevokeDate','now()');
 	$rc = $this->server->update();

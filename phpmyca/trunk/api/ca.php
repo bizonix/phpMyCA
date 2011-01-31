@@ -81,6 +81,68 @@ public function getCaChainIds($startId=null) {
 	}
 
 /**
+ * Get issuer family tree ids starting with specified ca id.
+ *
+ * Will return multidimensional recursive array, starting with specified CA id,
+ * all of its intermediate cert ids, all of their intermediate cert ids, and so
+ * on. Each array key will be a subject CA certificate ID, which will contain
+ * a array of ca certificate ids it has signed, and so on.  Example of
+ * output from getCaFailyTreeIds(1), where the CA certificate tree is:
+ * CA ID 1
+ *     Signed CA ID 2
+ *     Signed CA ID 5
+ *     Signed CA ID 14
+ *         Signed CA ID 3
+ *             Signed CA ID 4
+ * Array
+ * (
+ *     [2] => Array()
+ *     [5] => Array()
+ *     [14] => Array
+ *         (
+ *             [3] => Array
+ *                 (
+ *                     [4] => Array()
+ *                 )
+ *         )
+ * )
+ * @param int $caId (topmost parent ca id)
+ * @return array
+ */
+public function getCaFamilyTree($startId=null) {
+	$ret_ar = array();
+	if (!is_numeric($startId) or $startId < 1) { return $ret_ar; }
+	$this->searchReset();
+	$this->setSearchSelect('Id');
+	$this->setSearchFilter('ParentId',$startId);
+	$rows = $this->query();
+	if (!is_array($rows) or count($rows) < 1) { return $ret_ar; }
+	foreach($rows as &$row) {
+		$id = $row['Id'];
+		$ar = $this->getCaFamilyTree($id);
+		if (is_array($ar)) { $ret_ar[$id] = $ar; }
+		}
+	return $ret_ar;
+	}
+
+/**
+ * Take output of getCaFamilyTree() and return flat array of CA ids.
+ * @param array
+ * @return array
+ */
+public function getCaFamilyTreeIds(&$ids=null) {
+	$ar = array();
+	if (!is_array($ids) or count($ids) < 1) { return $ar; }
+	foreach($ids as $id => $children) {
+		$ar[] = $id;
+		if (is_array($children) and count($children) > 0) {
+			$ar = array_merge($ar,$this->getCaFamilyTreeIds($children));
+			}
+		}
+	return $ar;
+	}
+
+/**
  * Get the issuer CA id of specified CA cert id.
  * @param int $caId
  * @return mixed
