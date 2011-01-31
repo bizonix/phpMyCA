@@ -177,9 +177,9 @@ if ($revoked) { $class .= ' revoked'; }
 if (!$expired and !$revoked) {
 	if ($issuer->isExpired(30)) {
 		$issuer .= ' expire30';
-		} elseif ($cert->isExpired(60)) {
+		} elseif ($issuer->isExpired(60)) {
 		$issuer .= ' expire60';
-		} elseif ($cert->isExpired(90)) {
+		} elseif ($issuer->isExpired(90)) {
 		$issuer .= ' expire90';
 		}
 	}
