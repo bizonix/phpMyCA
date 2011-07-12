@@ -1,0 +1,74 @@
+Obtain the latest version of the following tarballs from:
+
+https://code.google.com/p/phpmyca/downloads/list
+
+phpmyca, phpdbo-api
+
+Note you need get root to do the remaining steps.
+
+INSTALL PHPMYCA/CREATE DATABASE
+
+Extract phpmyca to /usr/share/webapps and rename it.
+
+mkdir -p /usr/share/webapps
+cd /usr/share/webapps
+tar xvfz /wherever/you/put/phpmyca-x.x.x.tar.gz
+mv phpmyca-x.x.x phpmyca
+
+Move some things around, get rid of some cruft.
+
+cd /usr/share/webapps/phpmyca
+mv config /etc/phpmyca
+rm -r debian
+
+Add the database user you will be using, for example:
+
+mysql> grant all privileges on phpMyCA.* to youruser@localhost identified by 'password';
+mysql> flush privileges;
+mysql> quit;
+
+Create the database:
+
+cd sql
+mysql -u youruser -p < phpMyCA.sql
+
+After the database is created get rid of the sql directory.
+
+cd /usr/share/webapps/phpmyca
+rm -r sql
+
+Edit the config files.
+
+cd /etc/phpmyca
+mv openssl.conf-sample openssl.conf
+mv phpmyca.php-sample phpmyca.php
+
+Only edit openssl.conf if you really know what you are doing.
+
+Edit phpmyca.php to your needs.  In particular you need to change the database
+settings to what is required in your environment.  I wouldn't suggest changing
+anything else in that file unless you really know what you are doing.
+
+INSTALL PHPDBO-API
+
+Extract phpdbo-api to /usr/share/php, rename the directory, get rid of cruft.
+
+mkdir -p /usr/share/php
+cd /usr/share/php
+tar xvfz /wherver/you/put/phpdbo-api-x.x.x.tar.gz
+mv phpdbo-x.x.x phpdbo
+rm -r phpdbo/debian
+
+CONFIGURE APACHE
+
+Explaining how to configure apache with the plethora of different custom
+environments is an excercise in futility.  Take a look at
+/etc/phpmyca/apache.conf for an example of how to set up an alias to get
+it to work.  After adding an alias restart apache and access phpmyca at:
+
+http://yourhost.com/phpmyca/
+
+Lastly, get rid of this documentation directory, or move it elsewhere:
+
+cd /usr/share/webapps/phpmyca
+rm -r doc

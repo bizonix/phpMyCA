@@ -1,0 +1,65 @@
+Obtain the latest version of the following debian packages from:
+
+https://code.google.com/p/phpmyca/downloads/list
+
+phpmydb, phpmyca-sql-install, phpmyca, phpdbo-form-api, phpdbo-api,
+db-install
+
+If you maintain your own repository, you know what you are doing, do:
+
+apt-get install phpmyca
+
+To initialize the database, install the phpmyca-sql-install package on the
+mysql server that will host the database.
+
+apt-get install phpmyca-sql-install
+
+If you don't maintain your own repository you will need to install each
+debian package in the proper order.  Run dpkg -i for each of the packages
+in the following order:
+
+phpmydb
+phpdbo-api
+phpdbo-form-api
+phpmyca
+
+On the host where the database will reside, run dpkg -i for each of these
+packages in the following order:
+
+db-install
+phpmyca-sql-install
+
+To actually initialize the database, run:
+
+db-install
+
+It will prompt you for credentials that have permissions to drop and re-create
+a database named phpMyCA.  Make sure the user exists before running it, for
+example:
+
+mysql> grant all privileges on phpMyCA.* to youruser@localhost identified by 'password';
+mysql> flush privileges;
+
+Apache Configuration
+
+The config files reside in /etc/phpmyca/.
+
+Copy openssl.conf-sample to openssl.conf, if you really know what you are
+doing edit it to your needs.  Otherwise don't.
+
+Copy phpmyca.php-sample to phpmyca.php and change WEBAPP_DB_USER and
+WEBAPP_DB_PASS to whatever database credentials are appropriate, and possibly
+WEBAPP_DB_HOST if the database server and web server are not the same host.
+
+Take a look at apache.conf for an example of how to set the alias up.  If it
+meets your needs the simplest aproach is:
+
+cd /etc/apache2/conf.d
+ln -sf /etc/phpmyca/apache.conf phpmyca.conf
+/etc/init.d/apache2 restart
+
+You should now be able to access the web interface at:
+
+http://yourhost.com/phpmyca/
+
+Good luck.
