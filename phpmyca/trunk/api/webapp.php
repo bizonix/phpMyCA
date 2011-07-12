@@ -1877,12 +1877,8 @@ function getPageCaPkcs12() {
 				}
 			}
 		}
-	if (is_array($certs) and count($certs) > 0) {
-		$certs = implode("\n",$certs);
-		} else {
-		$certs = '';
-		}
-	$extraArgs = array('extracerts' => $certs, 'friendly_name' => $certName);
+	$extraArgs = array('friendly_name' => $certName);
+	if (count($certs)) { $extraArgs['extracerts'] = $certs; }
 	$rc = openssl_pkcs12_export($cert,$pkcs12,$pkey,$expPass,$extraArgs);
 	if (!($rc === true)) {
 		$this->html->errorMsgSet('Failed to export PKCS12 Certficate Store.');
@@ -2196,12 +2192,8 @@ function getPageClientPkcs12() {
 				}
 			}
 		}
-	if (is_array($certs) and count($certs) > 0) {
-		$certs = implode("\n",$certs);
-		} else {
-		$certs = '';
-		}
-	$extraArgs = array('extracerts' => $certs, 'friendly_name' => $certName);
+	$extraArgs = array('friendly_name' => $certName);
+	if (count($certs)) { $extraArgs['extracerts'] = $certs; }
 	$rc = openssl_pkcs12_export($cert,$pkcs12,$pkey,$expPass,$extraArgs);
 	if (!($rc === true)) {
 		$this->html->errorMsgSet('Failed to export PKCS12 Certficate Store.');
@@ -2449,12 +2441,8 @@ function getPageServerPkcs12() {
 				}
 			}
 		}
-	if (is_array($certs) and count($certs) > 0) {
-		$certs = implode("\n",$certs);
-		} else {
-		$certs = '';
-		}
-	$extraArgs = array('extracerts' => $certs, 'friendly_name' => $certName);
+	$extraArgs = array('friendly_name' => $certName);
+	if (count($certs)) { $extraArgs['extracerts'] = $certs; }
 	$rc = openssl_pkcs12_export($cert,$pkcs12,$pkey,$expPass,$extraArgs);
 	if (!($rc === true)) {
 		$this->html->errorMsgSet('Failed to export PKCS12 Certficate Store.');
