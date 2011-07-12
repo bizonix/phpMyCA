@@ -70,7 +70,7 @@ var $populated = false;
  * Wrapper to get database name
  */
 function getDatabase($s=true) {
-	$t = $this->_databaseName; return ($s) ? addslashes($t) : $t;
+	$t = $this->_databaseName; return ($s) ? $this->slasher($t) : $t;
 	}
 
 /**
@@ -83,7 +83,7 @@ function getDatabaseTable($s=true,$add_db=true) {
 		} else {
 		$t = $this->_databaseTable;
 		}
-	return ($s) ? addslashes($t) : $t;
+	return ($s) ? $this->slasher($t) : $t;
 	}
 
 /**
@@ -138,7 +138,7 @@ function getPropertyDescription($prop,$s=true) {
 function getPropertyField($prop,$s=true) {
 	if (!$this->isProperty($prop)) { return false; }
 	$f = $this->_propertyKeyGet($prop,'fieldName');
-	return ($s) ? addslashes($f) : $f;
+	return ($s) ? $this->slasher($f) : $f;
 	}
 
 /**
@@ -632,13 +632,13 @@ function setSearchFilter($prop_name=null,$prop_value=null,$search_type='=') {
 		}
 	if ($search_type == 'in' or $search_type == 'not in') {
 		for($j=0; $j < count($prop_value); $j++) {
-			$prop_value[$j] = $d . addslashes($prop_value[$j]) . $d;
+			$prop_value[$j] = $d . $this->slasher($prop_value[$j]) . $d;
 			}
 		$this->_searchFilters[] = $this->getPropertyField($prop_name) . ' '
 		. $search_type . '(' . implode(',',$prop_value) . ')';
 		} else {
 		$this->_searchFilters[] = $this->getPropertyField($prop_name) . ' '
-		. $search_type . ' ' . $d . addslashes($prop_value) . $d;
+		. $search_type . ' ' . $d . $this->slasher($prop_value) . $d;
 		}
 	return true;
 	}
@@ -684,7 +684,7 @@ function setSearchLimit($limit=null) {
 		}
 	$start = $junk[0];
 	$max   = $junk[1];
-	if (!is_numeric($start) or $start < 1) { return $this->_searchDisable(); }
+	if (!is_numeric($start) or $start < 0) { return $this->_searchDisable(); }
 	if (!is_numeric($max) or $max < 1) { return $this->_searchDisable(); }
 	$this->_searchLimit = $start . ',' . $max;
 	return true;
@@ -738,12 +738,21 @@ function setSearchSelect($prop_name=null,$distinct=false) {
 	if ($distinct === true) {
 		$this->_searchSelects[] = 'distinct '
 		. $this->getPropertyField($prop_name) . ' as '
-		. addslashes($prop_name);
+		. $this->slasher($prop_name);
 		} else {
 		$this->_searchSelects[] = $this->getPropertyField($prop_name) . ' as '
-		. "'" . addslashes($prop_name) . "'";
+		. "'" . $this->slasher($prop_name) . "'";
 		}
 	return true;
+	}
+
+/**
+ * If db connected, use mysql_real_escape_string(), otherwise addslashes()
+ * @param $txt
+ */
+function slasher($txt) {
+	return (is_object($this->db) and $this->db->connected) ?
+	mysql_real_escape_string($txt) : addslashes($txt);
 	}
 
 /**
