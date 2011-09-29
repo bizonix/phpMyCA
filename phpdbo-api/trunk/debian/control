@@ -7,7 +7,7 @@ Standards-Version: 3.6.2
 
 Package: phpdbo-api
 Architecture: all
-Depends: php5
+Depends: php5-cli | php5
 Description: Base class for php db object framework class
 
 Package: phpdbo-form-api
