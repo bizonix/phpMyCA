@@ -15,12 +15,12 @@ var $_persist = false;
 var $connected = false;
 
 /**
- ** Constructor
- **
- **/
-function phpmydb($db_host='',$db_name='',$db_user='',$db_pass='') {
+ * Constructor
+ */
+function __construct($db_host = '', $db_name = '', $db_user = '',
+                     $db_pass = '', $db_port = '') {
 	if (!empty($db_host) and !empty($db_user) and !empty($db_pass)) {
-		$this->db_connect($db_host,$db_name,$db_user,$db_pass);
+		$this->db_connect($db_host, $db_name, $db_user, $db_pass, $db_port);
 		}
 	}
 
@@ -38,12 +38,13 @@ function db_affected_rows() {
  ** as the name implies attempts to connect to the specified database.
  **
  **/
-function db_connect($dbh='',$dbn='',$dbu='',$dbp='') {
+function db_connect($dbh = '', $dbn = '', $dbu = '', $dbp = '', $port = '') {
 	if ($this->_persist === true) {
 		$func = 'mysql_pconnect';
 		} else {
 		$func = 'mysql_connect';
 		}
+	if (is_numeric($port)) { $dbh = $dbh . ':' . $port; }
 	if (!$dbh = $func($dbh,$dbu,$dbp)) {
 		return false;
 		}

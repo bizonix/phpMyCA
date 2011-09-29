@@ -18,12 +18,14 @@ class phpdbo {
  * Database settings
  * @var string
  * @see getDatabase(), setDatabase(), setDatabaseHost(), setDatabaseUser(),
- * @see setDatabasePass(), getDatabaseTable(), setDatabaseTable()
+ * @see setDatabasePass(), getDatabaseTable(), setDatabaseTable(),
+ * @see getDatabasePort(), setDatabasePort()
  */
 var $_databaseHost  = false;
 var $_databaseName  = false;
 var $_databaseUser  = false;
 var $_databasePass  = false;
+var $_databasePort  = false;
 var $_databaseTable = false;
 
 /**
@@ -62,6 +64,12 @@ var $_searchOrder   = false;
 var $_searchSelects = false;
 
 /**
+ * Manually set FROM clause for joins etc...
+ * @see setSearchFromClause()
+ */
+var $_searchFroms = array();
+
+/**
  * Runtime, do not set.
  */
 var $populated = false;
@@ -71,6 +79,13 @@ var $populated = false;
  */
 function getDatabase($s=true) {
 	$t = $this->_databaseName; return ($s) ? $this->slasher($t) : $t;
+	}
+
+/**
+ * Wrapper to get database port
+ */
+function getDatabasePort() {
+	return $this->_databasePort;
 	}
 
 /**
@@ -84,6 +99,18 @@ function getDatabaseTable($s=true,$add_db=true) {
 		$t = $this->_databaseTable;
 		}
 	return ($s) ? $this->slasher($t) : $t;
+	}
+
+/**
+ * Obtain the FROM clause for the current query.
+ * @return mixed
+ */
+private function getFromClause() {
+	if (is_array($this->_searchFroms) and count($this->_searchFroms)) {
+		return 'FROM ' . implode(', ', $this->_searchFroms);
+		} else {
+		return 'FROM ' . $this->getDatabaseTable();
+		}
 	}
 
 /**
@@ -209,6 +236,28 @@ function getPropertyQuoted($prop) {
  */
 function getPropertyValue($prop) {
 	return $this->_propertyKeyGet($prop,'value');
+	}
+
+/**
+ * Get list sql statement of currently populated object.
+ * @return string
+ */
+public function getListSqlStatement() {
+	if (!is_array($this->_searchSelects) or count($this->_searchSelects) < 1) {
+		return 'Must use setSearchSelect() before searching';
+		}
+	if (!($this->_searchEnabled === true)) {
+		return 'Searching has been disabled, possibly due to errors.';
+		}
+	$sql = 'SELECT ' . implode(', ', $this->_searchSelects) . ' '
+	. $this->getFromClause() . ' ';
+	if (is_array($this->_searchFilters) and count($this->_searchFilters) > 0) {
+		$sql .= 'WHERE ' . implode(' AND ',$this->_searchFilters) . ' ';
+		}
+	if (is_array($this->_searchOrder) and count($this->_searchOrder) > 0) {
+		$sql .= 'ORDER BY ' . implode(',',$this->_searchOrder) . ' ';
+		}
+	return $sql;
 	}
 
 /**
@@ -368,16 +417,19 @@ function query($debug=false) {
 		return 'Searching has been disabled, possibly due to errors.';
 		}
 	if (!($this->requireDatabase() === true)) { return 'db connection failed'; }
-	$sql = 'select ' . implode(',',$this->_searchSelects) . ' '
-	. 'from ' . $this->getDatabaseTable() . ' ';
+	$sql = 'SELECT ' . implode(', ', $this->_searchSelects) . ' '
+	. $this->getFromClause() . ' ';
 	if (is_array($this->_searchFilters) and count($this->_searchFilters) > 0) {
-		$sql .= 'where ' . implode(' and ',$this->_searchFilters) . ' ';
+		$sql .= 'WHERE ' . implode(' AND ',$this->_searchFilters) . ' ';
 		}
 	if (is_array($this->_searchOrder) and count($this->_searchOrder) > 0) {
-		$sql .= 'order by ' . implode(',',$this->_searchOrder) . ' ';
+		$sql .= 'ORDER BY ' . implode(',',$this->_searchOrder) . ' ';
 		}
 	if (!($this->_searchLimit === false)) {
-		$sql .= 'limit ' . $this->_searchLimit;
+		$sql .= 'LIMIT ' . $this->_searchLimit;
+		}
+	if ($debug) {
+		echo $sql . "\n";
 		}
 	$qid = $this->db->db_query($sql);
 	if ($qid === false) {
@@ -408,10 +460,13 @@ function queryHitsTotal($debug=false) {
 	if (!$this->isProperty($prop)) {
 		return 'queryHitsTotal() requires setIdProperty()';
 		}
-	$sql = 'select count(' . $this->getPropertyField($prop) . ') '
-	. 'from ' . $this->getDatabaseTable();
+	$sql = 'SELECT count(' . $this->getPropertyField($prop) . ') '
+	. $this->getFromClause();
 	if (is_array($this->_searchFilters) and count($this->_searchFilters) > 0) {
-		$sql .= ' where ' . implode(' and ',$this->_searchFilters);
+		$sql .= ' WHERE ' . implode(' and ',$this->_searchFilters);
+		}
+	if ($debug) {
+		echo $sql . "\n";
 		}
 	$qid = $this->db->db_query($sql);
 	if ($qid === false) {
@@ -437,8 +492,9 @@ function queryById($id=null) {
 	$q = $this->getPropertyQuoted($id_prop);
 	if (!is_bool($q)) { return false; }
 	($q) ? $d = '"' : $d = '';
-	$sql = 'select * from ' . $this->getDatabaseTable() . ' where '
-	. $this->getPropertyField($id_prop) . '=' . $d . $id . $d . ' limit 1';
+	$sql = 'SELECT * ' . $this->getFromClause() . ' WHERE '
+	. $this->getPropertyField($id_prop) . ' = '
+	. $d . $this->slasher($id) . $d . ' limit 1';
 	$qid = $this->db->db_query($sql);
 	if ($qid === false or !($this->db->db_num_rows($qid) == 1)) {
 		return false;
@@ -451,7 +507,7 @@ function queryById($id=null) {
 		$field = $this->getPropertyField($prop);
 		if (!is_string($field)) { return false; }
 		if (!array_key_exists($field,$row)) { return false; }
-		$ret_ar[$prop] = stripslashes($row[$field]);
+		$ret_ar[$prop] = $row[$field];
 		}
 	return $ret_ar;
 	}
@@ -472,7 +528,8 @@ function requireDatabase() {
 		if (!is_object($this->db)) { return 'failed to load db class'; }
 		}
 	$rc = $this->db->db_connect($this->_databaseHost,$this->_databaseName,
-	                            $this->_databaseUser,$this->_databasePass);
+	                            $this->_databaseUser,$this->_databasePass,
+	                            $this->_databasePort);
 	if ($rc === false) {
 		return 'failed to connect to database';
 		}
@@ -527,6 +584,11 @@ function setDatabasePass($txt=null) {
 	$this->_databasePass = $txt;
 	return true;
 	}
+function setDatabasePort($txt=null) {
+	if (!is_numeric($txt)) { return false; }
+	$this->_databasePort = $txt;
+	return true;
+	}
 function setDatabaseUser($txt=null) {
 	if (empty($txt)) { return false; }
 	$this->_databaseUser = $txt;
@@ -561,9 +623,12 @@ function setPropertyField($prop,$val) {
 	if (!is_string($val)) { return false; }
 	return $this->_propertyKeySet($prop,'fieldName',$val);
 	}
-function setPropertyIsDate($prop,$val) {
+function setPropertyIsDate($prop, $val = true) {
 	if (!is_bool($val)) { return false; }
 	return $this->_propertyKeySet($prop,'isDate',$val);
+	}
+function setPropertyIsNumeric($prop) {
+	return $this->_propertyKeySet($prop, 'isQuoted', false);
 	}
 function setPropertyIsQuoted($prop,$val) {
 	if (!is_bool($val)) { return false; }
@@ -663,6 +728,24 @@ function setSearchFilterClause($clause=false) {
 	}
 
 /**
+ * Manually specify search FROM clause(s)
+ *
+ * If set, the query will use values from these clauses instead of the
+ * defaults. These clauses will not be checked, field names translated,
+ * etc.
+ *
+ * @param string $clause
+ * @return bool
+ */
+function setSearchFromClause($clause = null) {
+	if (!($this->_searchEnabled === true)) { return false; }
+	if (!is_string($clause) or !strlen($clause)) { return false; }
+	if (!is_array($this->_searchFroms)) { return false; }
+	$this->_searchFroms[] = $clause;
+	return true;
+	}
+
+/**
  * Set search limits
  *
  * Can provide an int as the limit or comma separated min,max limit format.
@@ -736,12 +819,12 @@ function setSearchSelect($prop_name=null,$distinct=false) {
 		return $this->_searchDisable();
 		}
 	if ($distinct === true) {
-		$this->_searchSelects[] = 'distinct '
-		. $this->getPropertyField($prop_name) . ' as '
+		$this->_searchSelects[] = 'DISTINCT '
+		. $this->getPropertyField($prop_name) . ' AS '
 		. $this->slasher($prop_name);
 		} else {
-		$this->_searchSelects[] = $this->getPropertyField($prop_name) . ' as '
-		. "'" . $this->slasher($prop_name) . "'";
+		$this->_searchSelects[] = $this->getPropertyField($prop_name) . ' AS '
+		. "`" . $this->slasher($prop_name) . "`";
 		}
 	return true;
 	}
