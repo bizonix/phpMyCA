@@ -9,6 +9,12 @@
  */
 (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) && die('Access Denied');
 
+/**
+ * Define custom levels here...
+ */
+define('LOG_AUDIT', -1);
+define('LOG_HIPAA', -2);
+
 class phpdbolog extends phpdboform {
 
 /**
@@ -132,6 +138,8 @@ public function getLogLevel() {
  */
 public function getLogLevelName($lvl=null) {
 	switch($lvl) {
+		case LOG_HIPAA:   return 'HIPAA';   break; // -2
+		case LOG_AUDIT:   return 'AUDIT';   break; // -1
 		case LOG_EMERG:   return 'EMERG';   break; // 0
 		case LOG_ALERT:   return 'ALERT';   break; // 1
 		case LOG_CRIT:    return 'CRIT';    break; // 2
@@ -149,7 +157,9 @@ public function getLogLevelName($lvl=null) {
  * @param string $txt
  * @return bool
  */
+public function log_audit($txt=null)   { return $this->write($txt,LOG_AUDIT);   }
 public function log_debug($txt=null)   { return $this->write($txt,LOG_DEBUG);   }
+public function log_hipaa($txt=null)   { return $this->write($txt,LOG_HIPAA);   }
 public function log_info($txt=null)    { return $this->write($txt,LOG_INFO);    }
 public function log_notice($txt=null)  { return $this->write($txt,LOG_NOTICE);  }
 public function log_warning($txt=null) { return $this->write($txt,LOG_WARNING); }
@@ -236,6 +246,8 @@ private function getTimeStamp() { return date('Y-m-d H:i:s'); }
  */
 private function isValidLevel($lvl=null) {
 	switch($lvl) {
+		case LOG_HIPAA:   return true; break; // -2
+		case LOG_AUDIT:   return true; break; // -1
 		case LOG_EMERG:   return true; break; // 0
 		case LOG_ALERT:   return true; break; // 1
 		case LOG_CRIT:    return true; break; // 2
