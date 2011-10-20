@@ -27,6 +27,7 @@ install-stamp:
 	#
 	mkdir -p debian/$(DBO)$(SHARE)
 	mv phpdbo.class.php debian/$(DBO)$(SHARE)
+	mv phpdbo.encrypt.class.php debian/$(DBO)$(SHARE)
 	mv phpmydb.class.php debian/$(DBO)$(SHARE)
 	#
 	# $(FORM)

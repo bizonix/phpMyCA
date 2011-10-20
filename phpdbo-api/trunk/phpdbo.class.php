@@ -290,9 +290,9 @@ function populateFromDb($id=null) {
 	if (!is_array($ar)) { return false; }
 	$props = $this->getPropertyList();
 	if (!is_array($props)) { return false; }
-	foreach($props as $prop) {
-		if (!array_key_exists($prop,$ar)) { return false; }
-		$this->setProperty($prop,stripslashes($ar[$prop]));
+	foreach($props as &$prop) {
+		if (!array_key_exists($prop, $ar)) { return false; }
+		$this->setProperty($prop, $ar[$prop]);
 		}
 	$this->populated = true;
 	return true;
@@ -485,31 +485,34 @@ function queryHitsTotal($debug=false) {
  * @return bool false on errors or object does not exist
  * @return array containing object and with property names as keys
  */
-function queryById($id=null) {
+public function queryById($id=null) {
 	if (!$this->requireDatabase()) { return false; }
 	$id_prop = $this->getIdProperty();
 	if (!$this->isProperty($id_prop)) { return false; }
 	$q = $this->getPropertyQuoted($id_prop);
 	if (!is_bool($q)) { return false; }
 	($q) ? $d = '"' : $d = '';
-	$sql = 'SELECT * ' . $this->getFromClause() . ' WHERE '
-	. $this->getPropertyField($id_prop) . ' = '
+	// Select everything...
+	$selects = array();
+	$props = $this->getPropertyList();
+	if (!is_array($props) or !count($props)) { return false; }
+	foreach($props as &$prop) {
+		$selects[] = $this->getPropertyField($prop) . ' AS `'
+		. $this->slasher($prop) . '`';
+		}
+	$sql = 'SELECT ' . implode(', ', $selects) . $this->getFromClause() . ' '
+	. 'WHERE ' . $this->getPropertyField($id_prop) . ' = '
 	. $d . $this->slasher($id) . $d . ' limit 1';
 	$qid = $this->db->db_query($sql);
 	if ($qid === false or !($this->db->db_num_rows($qid) == 1)) {
 		return false;
 		}
-	$row    = $this->db->db_fetch_array($qid);
-	$props  = $this->getPropertyList();
-	$ret_ar = array();
-	if (!is_array($props)) { return false; }
-	foreach($props as $prop) {
-		$field = $this->getPropertyField($prop);
-		if (!is_string($field)) { return false; }
-		if (!array_key_exists($field,$row)) { return false; }
-		$ret_ar[$prop] = $row[$field];
+	$row = $this->db->db_fetch_array($qid);
+	foreach($props as &$prop) {
+		if (!array_key_exists($prop, $row)) { return false; }
 		}
-	return $ret_ar;
+	unset($props);
+	return $row;
 	}
 
 /**

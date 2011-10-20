@@ -1,3 +1,9 @@
+phpdbo-api (0.0.5-1) stable; urgency=low
+
+  * phpdbo-api: Add extended class to handle aes encrypted fields.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
 phpdbo-api (0.0.4-2) stable; urgency=low
 
   * phpdbo-log-api: Merge in downstream audit/hipaa log entries.
