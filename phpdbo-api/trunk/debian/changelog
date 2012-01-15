@@ -1,3 +1,9 @@
+phpdbo-api (0.0.6-1) stable; urgency=low
+
+  * phpdbo-api: Allow ordering to be done by random.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
 phpdbo-api (0.0.5-1) stable; urgency=low
 
   * phpdbo-api: Add extended class to handle aes encrypted fields.

@@ -786,6 +786,12 @@ function setSearchLimit($limit=null) {
  */
 function setSearchOrder($prop_name=null,$sort=null) {
 	if (!($this->_searchEnabled === true)) { return false; }
+	// special case - random results
+	if (strtolower($prop_name) == 'random') {
+		$this->_searchOrder[] = 'RAND()';
+		return true;
+		}
+	// otherwise the search property has to actually exist!
 	if (!$this->isProperty($prop_name)) {
 		return $this->_searchDisable();
 		}
