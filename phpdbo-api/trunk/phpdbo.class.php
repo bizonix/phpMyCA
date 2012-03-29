@@ -64,10 +64,11 @@ var $_searchOrder   = false;
 var $_searchSelects = false;
 
 /**
- * Manually set FROM clause for joins etc...
+ * Clauses for joins etc...
  * @see setSearchFromClause()
  */
-var $_searchFroms = array();
+public $_searchFroms = array();
+public $_searchJoins = array();
 
 /**
  * Runtime, do not set.
@@ -105,7 +106,7 @@ function getDatabaseTable($s=true,$add_db=true) {
  * Obtain the FROM clause for the current query.
  * @return mixed
  */
-private function getFromClause() {
+protected function getFromClause() {
 	if (is_array($this->_searchFroms) and count($this->_searchFroms)) {
 		return 'FROM ' . implode(', ', $this->_searchFroms);
 		} else {
@@ -251,6 +252,9 @@ public function getListSqlStatement() {
 		}
 	$sql = 'SELECT ' . implode(', ', $this->_searchSelects) . ' '
 	. $this->getFromClause() . ' ';
+	if (is_array($this->_searchJoins) and count($this->_searchJoins)) {
+		$sql .= implode(' ', $this->_searchJoins) . ' ';
+		}
 	if (is_array($this->_searchFilters) and count($this->_searchFilters) > 0) {
 		$sql .= 'WHERE ' . implode(' AND ',$this->_searchFilters) . ' ';
 		}
@@ -419,6 +423,9 @@ function query($debug=false) {
 	if (!($this->requireDatabase() === true)) { return 'db connection failed'; }
 	$sql = 'SELECT ' . implode(', ', $this->_searchSelects) . ' '
 	. $this->getFromClause() . ' ';
+	if (is_array($this->_searchJoins) and count($this->_searchJoins)) {
+		$sql .= implode(' ', $this->_searchJoins) . ' ';
+		}
 	if (is_array($this->_searchFilters) and count($this->_searchFilters) > 0) {
 		$sql .= 'WHERE ' . implode(' AND ',$this->_searchFilters) . ' ';
 		}
@@ -461,9 +468,12 @@ function queryHitsTotal($debug=false) {
 		return 'queryHitsTotal() requires setIdProperty()';
 		}
 	$sql = 'SELECT count(' . $this->getPropertyField($prop) . ') '
-	. $this->getFromClause();
+	. $this->getFromClause() . ' ';
+	if (is_array($this->_searchJoins) and count($this->_searchJoins)) {
+		$sql .= implode(' ', $this->_searchJoins) . ' ';
+		}
 	if (is_array($this->_searchFilters) and count($this->_searchFilters) > 0) {
-		$sql .= ' WHERE ' . implode(' and ',$this->_searchFilters);
+		$sql .= 'WHERE ' . implode(' and ',$this->_searchFilters);
 		}
 	if ($debug) {
 		echo $sql . "\n";
@@ -500,9 +510,13 @@ public function queryById($id=null) {
 		$selects[] = $this->getPropertyField($prop) . ' AS `'
 		. $this->slasher($prop) . '`';
 		}
-	$sql = 'SELECT ' . implode(', ', $selects) . $this->getFromClause() . ' '
-	. 'WHERE ' . $this->getPropertyField($id_prop) . ' = '
-	. $d . $this->slasher($id) . $d . ' limit 1';
+	$sql = 'SELECT ' . implode(', ', $selects) . ' '
+	     . $this->getFromClause() . ' ';
+	if (is_array($this->_searchJoins) and count($this->_searchJoins)) {
+		$sql .= implode(' ', $this->_searchJoins) . ' ';
+		}
+	$sql .= 'WHERE ' . $this->getPropertyField($id_prop) . ' = '
+	     . $d . $this->slasher($id) . $d . ' limit 1';
 	$qid = $this->db->db_query($sql);
 	if ($qid === false or !($this->db->db_num_rows($qid) == 1)) {
 		return false;
@@ -556,6 +570,7 @@ function resetProperties() {
 function searchReset() {
 	$this->_searchSelects    = array();
 	$this->_searchFilters    = array();
+	$this->_searchJoins      = array();
 	$this->_searchOrder      = array();
 	$this->_searchLimit      = false;
 	$this->searchHitsTotal   = 0;
@@ -745,6 +760,21 @@ function setSearchFromClause($clause = null) {
 	if (!is_string($clause) or !strlen($clause)) { return false; }
 	if (!is_array($this->_searchFroms)) { return false; }
 	$this->_searchFroms[] = $clause;
+	return true;
+	}
+
+/**
+ * Add a join statement to a sql query
+ * Note that field/property names will not be checked.
+ * @param string $clause - join statement
+ * @return bool
+ */
+protected function setSearchJoin($clause = null) {
+	if (!($this->_searchEnabled === true)) { return false; }
+	if (!is_string($clause) or !strlen($clause)) { return false; }
+	if (!is_array($this->_searchJoins)) { return false; }
+	if (in_array($clause, $this->_searchJoins)) { return true; }
+	$this->_searchJoins[] = $clause;
 	return true;
 	}
 
