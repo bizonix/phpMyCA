@@ -1,0 +1,49 @@
+phpdbo-api (0.0.7-1) stable; urgency=low
+
+  * phpdbo-api: phpdbo-api: Add rudimentary join handling to sql queries
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpdbo-api (0.0.6-1) stable; urgency=low
+
+  * phpdbo-api: Allow ordering to be done by random.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpdbo-api (0.0.5-1) stable; urgency=low
+
+  * phpdbo-api: Add extended class to handle aes encrypted fields.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpdbo-api (0.0.4-2) stable; urgency=low
+
+  * phpdbo-log-api: Merge in downstream audit/hipaa log entries.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpdbo-api (0.0.4-1) stable; urgency=low
+
+  * phpdbo-api: Merge in various downstream updates.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpdbo-api (0.0.3-1) stable; urgency=low
+
+  * phpdbo-api: Use mysql_real_escape_string() when possible.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpdbo-api (0.0.2-2) stable; urgency=low
+
+  * phpdbo-api: merge in phpmydb
+  * phpmydb: remove
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpdbo-api (0.0.2-1) stable; urgency=low
+
+  * phpdbo-form-api: incorporate downstream changes
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
