@@ -1,3 +1,9 @@
+phpdbo-api (0.0.8-2) stable; urgency=low
+
+  * phpdbo-api: Make setSearchJoin public, housecleaning.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
 phpdbo-api (0.0.8-1) stable; urgency=low
 
   * phpdbo-api: Handle contains searches of numbers correctly.

@@ -78,21 +78,21 @@ var $populated = false;
 /**
  * Wrapper to get database name
  */
-function getDatabase($s=true) {
+public function getDatabase($s=true) {
 	$t = $this->_databaseName; return ($s) ? $this->slasher($t) : $t;
 	}
 
 /**
  * Wrapper to get database port
  */
-function getDatabasePort() {
+public function getDatabasePort() {
 	return $this->_databasePort;
 	}
 
 /**
  * Wrapper to get table name
  */
-function getDatabaseTable($s=true,$add_db=true) {
+public function getDatabaseTable($s=true,$add_db=true) {
 	if ($add_db) {
 		$db = $this->getDatabase(false);
 		$t  = $db . '.' . $this->_databaseTable;
@@ -119,7 +119,7 @@ protected function getFromClause() {
  * @return false on errors
  * @return string property name
  */
-function getIdProperty() {
+public function getIdProperty() {
 	if (!is_string($this->_idProperty)) { return false; }
 	if (!$this->isProperty($this->_idProperty)) { return false; }
 	return $this->_idProperty;
@@ -128,14 +128,14 @@ function getIdProperty() {
 /**
  * Get the value of the specified property.
  */
-function getProperty($prop) {
+public function getProperty($prop) {
 	return $this->_propertyKeyGet($prop,'value');
 	}
 
 /**
  * Get sorted list of all property names
  */
-function getPropertyList() {
+public function getPropertyList() {
 	if (!is_array($this->_properties)) { return false; }
 	$t = array();
 	foreach($this->_properties as $prop => $junk) {
@@ -151,7 +151,7 @@ function getPropertyList() {
  * @return string property
  * @return bool false on errors
  */
-function getPropertyDescription($prop,$s=true) {
+public function getPropertyDescription($prop,$s=true) {
 	if (!$this->isProperty($prop)) { return false; }
 	return $this->_propertyKeyGet($prop,'desc');
 	}
@@ -163,7 +163,7 @@ function getPropertyDescription($prop,$s=true) {
  * @return string field name
  * @return bool false on errors
  */
-function getPropertyField($prop,$s=true) {
+public function getPropertyField($prop,$s=true) {
 	if (!$this->isProperty($prop)) { return false; }
 	$f = $this->_propertyKeyGet($prop,'fieldName');
 	return ($s) ? $this->slasher($f) : $f;
@@ -175,7 +175,7 @@ function getPropertyField($prop,$s=true) {
  * @return string error message on failures
  * @return bool
  */
-function getPropertyIsDate($prop) {
+public function getPropertyIsDate($prop) {
 	if (!$this->isProperty($prop)) { return 'not a property'; }
 	return $this->_propertyKeyGet($prop,'isDate');
 	}
@@ -186,7 +186,7 @@ function getPropertyIsDate($prop) {
  * @return string error message on failures
  * @return bool
  */
-function getPropertyIsReadOnly($prop) {
+public function getPropertyIsReadOnly($prop) {
 	if (!$this->isProperty($prop)) { return 'not a property'; }
 	return $this->_propertyKeyGet($prop,'isReadOnly');
 	}
@@ -197,7 +197,7 @@ function getPropertyIsReadOnly($prop) {
  * @return string error message on failures
  * @return bool
  */
-function getPropertyIsUnique($prop) {
+public function getPropertyIsUnique($prop) {
 	if (!$this->isProperty($prop)) { return 'not a property'; }
 	return $this->_propertyKeyGet($prop,'isUnique');
 	}
@@ -208,7 +208,7 @@ function getPropertyIsUnique($prop) {
  * @return int maximum string length
  * @return bool false on errors
  */
-function getPropertyMaxLength($prop) {
+public function getPropertyMaxLength($prop) {
 	if (!$this->isProperty($prop)) { return false; }
 	return $this->_propertyKeyGet($prop,'maxLength');
 	}
@@ -224,7 +224,7 @@ function getPropertyMaxLength($prop) {
  * @return true if quoted
  * @return false if not quoted
  */
-function getPropertyQuoted($prop) {
+public function getPropertyQuoted($prop) {
 	if (!$this->isProperty($prop)) { return 'is not a property'; }
 	$f = $this->_properties[$prop]['isQuoted'];
 	if (!is_bool($f)) { return 'invalid isQuoted setting'; }
@@ -235,7 +235,7 @@ function getPropertyQuoted($prop) {
  * Get the value of the specified property.
  * @deprecated use getProperty() instead
  */
-function getPropertyValue($prop) {
+public function getPropertyValue($prop) {
 	return $this->_propertyKeyGet($prop,'value');
 	}
 
@@ -267,7 +267,7 @@ public function getListSqlStatement() {
 /**
  * Is the property valid?
  */
-function isProperty($prop=false) {
+public function isProperty($prop=false) {
 	if ($prop === false) { return false; }
 	if (!is_array($this->_properties)) { return false; }
 	if (!array_key_exists($prop,$this->_properties)) { return false; }
@@ -287,7 +287,7 @@ function isProperty($prop=false) {
  * @param mixed $id to look up
  * @return bool
  */
-function populateFromDb($id=null) {
+public function populateFromDb($id=null) {
 	if ($this->populated === true) { return false; }
 	$this->resetProperties();
 	$ar = $this->queryById($id);
@@ -310,7 +310,7 @@ function populateFromDb($id=null) {
  * @param array $props additional properties ;)
  * @return bool
  */
-function propertyAdd($prop=false,$field=false,$desc=false,$props=false) {
+public function propertyAdd($prop=false,$field=false,$desc=false,$props=false) {
 	if (!is_array($this->_properties)) { return false; }
 	if (!is_string($prop))             { return false; }
 	if (array_key_exists($prop,$this->_properties)) { return false; }
@@ -370,7 +370,7 @@ function propertyAdd($prop=false,$field=false,$desc=false,$props=false) {
  * @param string key name
  * @return bool
  */
-function propertyKeyAdd($key=false) {
+public function propertyKeyAdd($key=false) {
 	if (!is_string($key)) { return false; }
 	if (!is_array($this->_propertyKeys)) { return false; }
 	if (in_array($key,$this->_propertyKeys)) { return true; }
@@ -391,7 +391,7 @@ function propertyKeyAdd($key=false) {
  * @return bool false
  * @return string value
  */
-function propertyKeyGet($prop,$key) {
+public function propertyKeyGet($prop,$key) {
 	return $this->_propertyKeyGet($prop,$key);
 	}
 
@@ -402,7 +402,7 @@ function propertyKeyGet($prop,$key) {
  * @param string key value
  * @return bool
  */
-function propertyKeySet($prop,$key,$val) {
+public function propertyKeySet($prop,$key,$val) {
 	return $this->_propertyKeySet($prop,$key,$val);
 	}
 
@@ -413,7 +413,7 @@ function propertyKeySet($prop,$key,$val) {
  * @param bool setHitCounts - will populate searchHitsTotal/Current if true
  * @see searchReset(), setFilter(), setLimit(), setSelect()
  */
-function query($debug=false) {
+public function query($debug=false) {
 	if (!is_array($this->_searchSelects) or count($this->_searchSelects) < 1) {
 		return 'Must use setSearchSelect() before searching';
 		}
@@ -455,7 +455,7 @@ function query($debug=false) {
  * @return string error message on failures
  * @return int hits total on success
  */
-function queryHitsTotal($debug=false) {
+public function queryHitsTotal($debug=false) {
 	if (!is_array($this->_searchSelects) or count($this->_searchSelects) < 1) {
 		return 'queryHitsTotal() requires setSearchSelect()';
 		}
@@ -532,7 +532,7 @@ public function queryById($id=null) {
 /**
  * Attempt to autoload the database connection object
  */
-function requireDatabase() {
+public function requireDatabase() {
 	if (is_object($this->db) and $this->db->connected === true) { return true; }
 	if (!is_object($this->db)) {
 		if (!is_string($this->_db_class)) {
@@ -556,7 +556,7 @@ function requireDatabase() {
 /**
  * Reset property values, for running multiple populate calls.
  */
-function resetProperties() {
+public function resetProperties() {
 	foreach($this->getPropertyList() as $prop) {
 		$this->setProperty($prop,false);
 		}
@@ -567,7 +567,7 @@ function resetProperties() {
 /**
  * Initialize a new search.
  */
-function searchReset() {
+public function searchReset() {
 	$this->_searchSelects    = array();
 	$this->_searchFilters    = array();
 	$this->_searchJoins      = array();
@@ -582,37 +582,37 @@ function searchReset() {
 /**
  * Wrappers for database settings.
  */
-function setDatabase($txt=null) {
+public function setDatabase($txt=null) {
 	if (empty($txt)) { return false; }
 	$this->_databaseName = $txt;
 	return true;
 	}
-function setDatabaseClass($txt=null) {
+public function setDatabaseClass($txt=null) {
 	if (empty($txt)) { return false; }
 	$this->_db_class = $txt;
 	return true;
 	}
-function setDatabaseHost($txt=null) {
+public function setDatabaseHost($txt=null) {
 	if (empty($txt)) { return false; }
 	$this->_databaseHost = $txt;
 	return true;
 	}
-function setDatabasePass($txt=null) {
+public function setDatabasePass($txt=null) {
 	if (empty($txt)) { return false; }
 	$this->_databasePass = $txt;
 	return true;
 	}
-function setDatabasePort($txt=null) {
+public function setDatabasePort($txt=null) {
 	if (!is_numeric($txt)) { return false; }
 	$this->_databasePort = $txt;
 	return true;
 	}
-function setDatabaseUser($txt=null) {
+public function setDatabaseUser($txt=null) {
 	if (empty($txt)) { return false; }
 	$this->_databaseUser = $txt;
 	return true;
 	}
-function setDatabaseTable($table=null) {
+public function setDatabaseTable($table=null) {
 	if (empty($table)) { return false; }
 	$this->_databaseTable = $table;
 	return true;
@@ -630,42 +630,42 @@ function setIdProperty($prop) {
 /**
  * Wrapper methods to set property keys
  */
-function setProperty($prop,$val) {
+public function setProperty($prop,$val) {
 	return $this->_propertyKeySet($prop,'value',$val);
 	}
-function setPropertyDescription($prop,$val) {
+public function setPropertyDescription($prop,$val) {
 	if (!is_string($val)) { return false; }
 	return $this->_propertyKeySet($prop,'desc',$val);
 	}
-function setPropertyField($prop,$val) {
+public function setPropertyField($prop,$val) {
 	if (!is_string($val)) { return false; }
 	return $this->_propertyKeySet($prop,'fieldName',$val);
 	}
-function setPropertyIsDate($prop, $val = true) {
+public function setPropertyIsDate($prop, $val = true) {
 	if (!is_bool($val)) { return false; }
 	return $this->_propertyKeySet($prop,'isDate',$val);
 	}
-function setPropertyIsNumeric($prop) {
+public function setPropertyIsNumeric($prop) {
 	return $this->_propertyKeySet($prop, 'isQuoted', false);
 	}
-function setPropertyIsQuoted($prop,$val) {
+public function setPropertyIsQuoted($prop,$val) {
 	if (!is_bool($val)) { return false; }
 	return $this->_propertyKeySet($prop,'isQuoted',$val);
 	}
-function setPropertyIsReadOnly($prop,$val) {
+public function setPropertyIsReadOnly($prop,$val) {
 	if (!is_bool($val)) { return false; }
 	return $this->_propertyKeySet($prop,'isReadOnly',$val);
 	}
-function setPropertyIsUnique($prop,$val) {
+public function setPropertyIsUnique($prop,$val) {
 	if (!is_bool($val)) { return false; }
 	return $this->_propertyKeySet($prop,'isUnique',$val);
 	}
-function setPropertyMaxLength($prop,$val) {
+public function setPropertyMaxLength($prop,$val) {
 	if (!is_numeric($val) or $val < 1) { return false; }
 	return $this->_propertyKeySet($prop,'maxLength',$val);
 	}
 /** @deprecated use setProperty() instead */
-function setPropertyValue($prop,$val) {
+public function setPropertyValue($prop,$val) {
 	return $this->_propertyKeySet($prop,'value',$val);
 	}
 
@@ -682,7 +682,7 @@ function setPropertyValue($prop,$val) {
  * @param string $search_type (optional) =|like|>|<
  * @return bool
  */
-function setSearchFilter($prop_name = null, $prop_value = null, $search_type = '=') {
+public function setSearchFilter($prop_name = null, $prop_value = null, $search_type = '=') {
 	if (!($this->_searchEnabled === true)) { return false; }
 	if (!$this->isProperty($prop_name)) {
 		return $this->_searchDisable();
@@ -735,7 +735,7 @@ function setSearchFilter($prop_name = null, $prop_value = null, $search_type = '
  * @param string $clause
  * @return bool
  */
-function setSearchFilterClause($clause=false) {
+public function setSearchFilterClause($clause=false) {
 	if (!($this->_searchEnabled === true)) { return false; }
 	if ($clause === false) { return false;}
 	if (!is_array($this->_searchFilters)) {
@@ -755,7 +755,7 @@ function setSearchFilterClause($clause=false) {
  * @param string $clause
  * @return bool
  */
-function setSearchFromClause($clause = null) {
+public function setSearchFromClause($clause = null) {
 	if (!($this->_searchEnabled === true)) { return false; }
 	if (!is_string($clause) or !strlen($clause)) { return false; }
 	if (!is_array($this->_searchFroms)) { return false; }
@@ -769,7 +769,7 @@ function setSearchFromClause($clause = null) {
  * @param string $clause - join statement
  * @return bool
  */
-protected function setSearchJoin($clause = null) {
+public function setSearchJoin($clause = null) {
 	if (!($this->_searchEnabled === true)) { return false; }
 	if (!is_string($clause) or !strlen($clause)) { return false; }
 	if (!is_array($this->_searchJoins)) { return false; }
@@ -787,7 +787,7 @@ protected function setSearchJoin($clause = null) {
  * @param string limit - min,max
  * @return bool
  */
-function setSearchLimit($limit=null) {
+public function setSearchLimit($limit=null) {
 	if (!($this->_searchEnabled === true)) { return false; }
 	if (is_numeric($limit)) {
 		if ($limit < 1) { return $this->_searchDisable(); }
@@ -814,7 +814,7 @@ function setSearchLimit($limit=null) {
  * @param string prop_name
  * @return bool
  */
-function setSearchOrder($prop_name=null,$sort=null) {
+public function setSearchOrder($prop_name=null,$sort=null) {
 	if (!($this->_searchEnabled === true)) { return false; }
 	// special case - random results
 	if (strtolower($prop_name) == 'random') {
@@ -849,7 +849,7 @@ function setSearchOrder($prop_name=null,$sort=null) {
  * @param string prop_name
  * @return bool
  */
-function setSearchSelect($prop_name=null,$distinct=false) {
+public function setSearchSelect($prop_name=null,$distinct=false) {
 	if (!($this->_searchEnabled === true)) { return false; }
 	if (!$this->isProperty($prop_name)) {
 		return $this->_searchDisable();
@@ -872,7 +872,7 @@ function setSearchSelect($prop_name=null,$distinct=false) {
  * If db connected, use mysql_real_escape_string(), otherwise addslashes()
  * @param $txt
  */
-function slasher($txt) {
+public function slasher($txt) {
 	return (is_object($this->db) and $this->db->connected) ?
 	mysql_real_escape_string($txt) : addslashes($txt);
 	}
@@ -880,7 +880,7 @@ function slasher($txt) {
 /**
  * Get a property key
  */
-function _propertyKeyGet($prop,$key=false) {
+public function _propertyKeyGet($prop,$key=false) {
 	if (!$this->isProperty($prop)) { return false; }
 	if (!array_key_exists($key,$this->_properties[$prop])) { return false; }
 	return $this->_properties[$prop][$key];
@@ -888,7 +888,7 @@ function _propertyKeyGet($prop,$key=false) {
 /**
  * Set a property key to specified value.
  */
-function _propertyKeySet($prop=false,$key=false,$txt=false) {
+public function _propertyKeySet($prop=false,$key=false,$txt=false) {
 	if (!$this->isProperty($prop)) { return false; }
 	$this->_properties[$prop][$key] = $txt;
 	return true;
@@ -898,7 +898,7 @@ function _propertyKeySet($prop=false,$key=false,$txt=false) {
  * Disable searching, used to prevent search attempts when errors are detected.
  * @return bool false
  */
-function _searchDisable() {
+public function _searchDisable() {
 	$this->_searchEnabled = false;
 	return false;
 	}
@@ -907,7 +907,7 @@ function _searchDisable() {
  * Validate a date string.
  * @return bool
  */
-function _validateDateString($val='') {
+public function _validateDateString($val='') {
 	if ($val == '') { return false; }
 	if ($val == 'now()') { return true; }
 	if ($val == '0000-00-00 00:00:00') { return true; }
