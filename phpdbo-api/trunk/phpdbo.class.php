@@ -682,7 +682,7 @@ function setPropertyValue($prop,$val) {
  * @param string $search_type (optional) =|like|>|<
  * @return bool
  */
-function setSearchFilter($prop_name=null,$prop_value=null,$search_type='=') {
+function setSearchFilter($prop_name = null, $prop_value = null, $search_type = '=') {
 	if (!($this->_searchEnabled === true)) { return false; }
 	if (!$this->isProperty($prop_name)) {
 		return $this->_searchDisable();
@@ -710,7 +710,7 @@ function setSearchFilter($prop_name=null,$prop_value=null,$search_type='=') {
 		break;
 		case 'not like':
 		case 'like':
-			if (!$q) { return $this->_searchDisable(); }
+			$q = true; $d = '"';
 		break;
 		}
 	if ($search_type == 'in' or $search_type == 'not in') {

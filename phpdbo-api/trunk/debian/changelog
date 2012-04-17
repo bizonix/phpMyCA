@@ -1,3 +1,9 @@
+phpdbo-api (0.0.8-1) stable; urgency=low
+
+  * phpdbo-api: Handle contains searches of numbers correctly.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
 phpdbo-api (0.0.7-1) stable; urgency=low
 
   * phpdbo-api: phpdbo-api: Add rudimentary join handling to sql queries
