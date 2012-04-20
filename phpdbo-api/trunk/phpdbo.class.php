@@ -570,6 +570,7 @@ public function resetProperties() {
 public function searchReset() {
 	$this->_searchSelects    = array();
 	$this->_searchFilters    = array();
+	$this->_searchFroms      = array();
 	$this->_searchJoins      = array();
 	$this->_searchOrder      = array();
 	$this->_searchLimit      = false;
