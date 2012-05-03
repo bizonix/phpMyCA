@@ -19,3 +19,8 @@ Package: phpdbo-log-api
 Architecture: all
 Depends: phpdbo-form-api
 Description: Generic logging class based on phpdboform object
+
+Package: phpdbo-sqlanywhere
+Architecture: all
+Depends: php5-sqlanywhere, phpdbo-api
+Description: phpdbo database wrapper for sqlanywhere

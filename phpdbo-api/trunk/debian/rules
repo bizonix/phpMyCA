@@ -4,8 +4,9 @@ SHARE  = /usr/share/php/phpdbo
 DBO    = phpdbo-api
 FORM   = phpdbo-form-api
 LOG    = phpdbo-log-api
+SANY   = phpdbo-sqlanywhere
 
-ALLDIRS = $(DBO) $(FORM) $(LOG)
+ALLDIRS = $(DBO) $(FORM) $(LOG) $(SANY)
 
 build:
 	touch build-stamp
@@ -40,6 +41,11 @@ install-stamp:
 	#
 	mkdir -p debian/$(LOG)$(SHARE)
 	mv phpdbo.log.class.php debian/$(LOG)$(SHARE)
+	#
+	# $(SANY)
+	#
+	mkdir -p debian/$(SANY)$(SHARE)
+	mv phpsqlanywhere.class.php debian/$(SANY)$(SHARE)
 	touch install-stamp
 
 # Build architecture-independent files here.
