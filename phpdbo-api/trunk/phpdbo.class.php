@@ -702,6 +702,8 @@ public function setSearchFilter($prop_name = null, $prop_value = null, $search_t
 		case '=':
 		case '>':
 		case '<':
+		case '<=':
+		case '>=':
 		break;
 		case 'not in':
 		case 'in':

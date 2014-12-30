@@ -1,3 +1,9 @@
+phpdbo-api (0.0.10-1) stable; urgency=low
+
+  * phpdbo-api: add >= and <= to queries
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
 phpdbo-api (0.0.9-1) stable; urgency=low
 
   * phpdbo-sqlanywhere: created
