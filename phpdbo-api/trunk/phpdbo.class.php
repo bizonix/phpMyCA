@@ -872,6 +872,17 @@ public function setSearchSelect($prop_name=null,$distinct=false) {
 	}
 
 /**
+ * Wrapper to setSearchSelect() all object properties.
+ * return void
+ */
+public function setSearchSelectAll() {
+	$props = $this->getPropertyList();
+	foreach($props as &$prop) {
+		$this->setSearchSelect($prop);
+		}
+	}
+
+/**
  * If db connected, use mysql_real_escape_string(), otherwise addslashes()
  * @param $txt
  */
