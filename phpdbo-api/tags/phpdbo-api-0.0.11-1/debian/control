@@ -1,0 +1,26 @@
+Source: phpdbo-api
+Section: web
+Priority: optional
+Maintainer: Mike Green <mdgreen@gmail.com>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.2
+
+Package: phpdbo-api
+Architecture: all
+Depends: php5-cli | php5
+Description: Base class for php db object framework class
+
+Package: phpdbo-form-api
+Architecture: all
+Depends: phpdbo-api
+Description: Form generation class based on phpdbo
+
+Package: phpdbo-log-api
+Architecture: all
+Depends: phpdbo-form-api
+Description: Generic logging class based on phpdboform object
+
+Package: phpdbo-sqlanywhere
+Architecture: all
+Depends: php5-sqlanywhere, phpdbo-api
+Description: phpdbo database wrapper for sqlanywhere
