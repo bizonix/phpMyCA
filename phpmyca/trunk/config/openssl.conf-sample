@@ -30,7 +30,7 @@ emailAddress           = optional
 
 [ req ]
 default_bits           = 2048
-default_md             = sha1
+default_md             = sha256
 string_mask            = nombstr
 distinguished_name     = req_distinguished_name
 

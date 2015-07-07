@@ -1,3 +1,9 @@
+phpmyca (0.0.6-3) stable; urgency=low
+
+  * phpmyca: set default message digest to sha256 in the sample config
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
 phpmyca (0.0.6-2) stable; urgency=low
 
   * phpmyca: Fix export of pkcs12 certs - the CA chain was not being correctly
