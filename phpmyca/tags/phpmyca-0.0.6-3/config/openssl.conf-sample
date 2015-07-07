@@ -1,0 +1,70 @@
+[ ca ]
+default_ca             = CA_default
+
+[ CA_default ]
+default_days           = 3650
+default_md             = sha1
+preserve               = no
+email_in_dn            = no
+name_opt                = default_ca
+cert_opt                = default_ca
+policy                 = policy_match
+
+[ policy_match ]
+localityName           = optional
+countryName            = optional
+stateOrProvinceName    = optional
+organizationName       = match
+organizationalUnitName = match
+commonName             = supplied
+emailAddress           = optional
+
+[ policy_anything ]
+localityName           = optional
+countryName            = optional
+stateOrProvinceName    = optional
+organizationName       = match
+organizationalUnitName = match
+commonName             = supplied
+emailAddress           = optional
+
+[ req ]
+default_bits           = 2048
+default_md             = sha256
+string_mask            = nombstr
+distinguished_name     = req_distinguished_name
+
+[ req_distinguished_name ]
+0.organizationName     = Organization Name (company)
+organizationalUnitName = Organizational Unit Name (department, division)
+emailAddress           = Email Address
+emailAddress_max       = 40
+localityName           = Locality Name (city, district)
+stateOrProvinceName    = State or Province Name (full name)
+countryName            = Country Name (2 letter code)
+countryName_min        = 2
+countryName_max        = 2
+commonName             = Common Name (hostname, IP, or your name)
+commonName_max         = 64
+
+# req -new -x509 -extensions v3_ca
+[ v3_ca ]
+basicConstraints        = critical,CA:TRUE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer:always
+keyUsage                = keyCertSign, cRLSign
+
+# req -new -x509 -extensions v3_server
+[ v3_server ]
+basicConstraints        = critical,CA:FALSE
+subjectKeyIdentifier    = hash
+keyUsage                = critical,nonRepudiation,keyEncipherment,dataEncipherment
+extendedKeyUsage        = serverAuth,emailProtection,timeStamping,msSGC,msEFS,nsSGC
+
+# req -new -x509 -extensions v3_client
+[ v3_client ]
+basicConstraints        = critical,CA:FALSE
+subjectKeyIdentifier    = hash
+keyUsage                = critical,digitalSignature,keyEncipherment,dataEncipherment
+extendedKeyUsage        = clientAuth,codeSigning,emailProtection,msCodeInd,msCodeCom,msCTLSign
+subjectAltName          = email:copy

@@ -1,0 +1,55 @@
+phpmyca (0.0.6-3) stable; urgency=low
+
+  * phpmyca: set default message digest to sha256 in the sample config
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.6-2) stable; urgency=low
+
+  * phpmyca: Fix export of pkcs12 certs - the CA chain was not being correctly
+    handled.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.6-1) stable; urgency=low
+
+  * phpmyca: Require CA pass when revoking.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.5-2) stable; urgency=low
+
+  * phpmyca: Oops, bug in view templates.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.5-1) stable; urgency=low
+
+  * phpmyca: Implement phpmycaCert class for common tasks to display certs.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.4-1) stable; urgency=low
+
+  * phpmyca: Auto-populate form fields when creating certificates.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.3-1) stable; urgency=low
+
+  * phpmyca: partially implemented certification revocation
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.2-1) stable; urgency=low
+
+  * phpmyca: highlight looming expirations, add revoke date.
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
+phpmyca (0.0.1-2) stable; urgency=low
+
+  * phpmyca: Import into google code project repo
+
+ -- Mike Green <mdgreen@gmail.com>  Thu, 02 Dec 2010 10:18:02 -0500
+
